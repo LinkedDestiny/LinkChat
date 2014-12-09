@@ -3,6 +3,8 @@ package com.link.platform.network.socket;
 import com.link.platform.util.Error;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -40,5 +42,33 @@ public class IOHelper {
         }
     }
 
+    // change ip from int to String
+    public static  String ipIntToString(int ip) {
+        try {
+            byte[] bytes = new byte[4];
+            bytes[0] = (byte) (0xff & ip);
+            bytes[1] = (byte) ((0xff00 & ip) >> 8);
+            bytes[2] = (byte) ((0xff0000 & ip) >> 16);
+            bytes[3] = (byte) ((0xff000000 & ip) >> 24);
+            return Inet4Address.getByAddress(bytes).getHostAddress();
+
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    // change ip from String to int
+    public static int ipToInt(String ipAddr) {
+        try {
+            byte[] bytes = InetAddress.getByName(ipAddr).getAddress();
+            int addr = bytes[0] & 0xFF;
+            addr |= ((bytes[1] << 8 ) & 0xFF00);
+            addr |= ((bytes[2] << 16) & 0xFF0000);
+            addr |= ((bytes[3] << 24) & 0xFF000000);
+            return  addr;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(ipAddr + " is invalid IP");
+        }
+    }
 
 }

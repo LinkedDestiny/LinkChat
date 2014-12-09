@@ -5,6 +5,7 @@ import com.link.platform.network.socket.MainServer;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,11 +22,11 @@ public class BaseController implements IController {
 
     @Override
     public void onConnect(Socket fd) {
-
+        // TODO boastcast online list
     }
 
     @Override
-    public void onReceive(Socket fd, byte[] message) {
+    public void onReceive(Socket fd, ByteBuffer message) {
         List<Socket> connect_list = server.getConnect_list();
         Iterator<Socket> iter = connect_list.iterator();
 
@@ -33,7 +34,7 @@ public class BaseController implements IController {
             Socket socket = iter.next();
             if( socket.getInetAddress().getHostAddress().equals( fd.getInetAddress().getHostAddress() ) )
             try {
-                server.send(socket, message);
+                server.send(socket, message.array());
             } catch (IOException e) {
                 e.printStackTrace();
             }

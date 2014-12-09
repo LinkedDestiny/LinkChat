@@ -10,6 +10,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -173,7 +174,7 @@ public class MainServer implements Runnable {
                 throw new IOException("accpet failed");
             }
             connect_list.add(channel.socket());
-            buffer_map.put( channel.socket() , ByteBuffer.allocate(Utils.BUFFER_SIZE));
+            buffer_map.put(channel.socket(), ByteBuffer.allocate(Utils.BUFFER_SIZE));
             controller.onConnect(channel.socket());
 
             channel.configureBlocking(false);
@@ -204,7 +205,8 @@ public class MainServer implements Runnable {
             } else {
                 byte[] buff = new byte[errno];
                 buffer.get( buff );
-                controller.onReceive(channel.socket(), buff);
+
+                controller.onReceive(channel.socket(), ByteBuffer.wrap(buff) );
                 if( !buffer.hasRemaining() ) {
                     buffer.clear();
                 } else {

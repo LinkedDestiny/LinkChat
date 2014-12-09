@@ -140,7 +140,7 @@ public class MainClient implements Runnable {
             } else {
                 byte[] buff = new byte[errno];
                 buffer.get( buff );
-                iClient.onReceive(buff);
+                iClient.onReceive(ByteBuffer.wrap(buff));
 
                 if( !buffer.hasRemaining() ) {
                     buffer.clear();

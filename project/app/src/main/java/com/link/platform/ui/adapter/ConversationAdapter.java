@@ -13,13 +13,13 @@ import java.util.List;
 /**
  * Created by danyang.ldy on 2014/12/8.
  */
-public class ChatRoomAdapter extends BaseAdapter {
+public class ConversationAdapter extends BaseAdapter {
 
     private Context context;
     private List<WiFiItem> list;
     private LayoutInflater inflater;
 
-    public ChatRoomAdapter(Context context, List<WiFiItem> list) {
+    public ConversationAdapter(Context context, List<WiFiItem> list) {
         this.context = context;
         this.list = list;
         this.inflater = LayoutInflater.from(context);

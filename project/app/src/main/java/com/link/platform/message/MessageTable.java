@@ -8,4 +8,10 @@ public class MessageTable {
     public final static String MSG_RECEIVE_PICTURE                  = "MSG_RECEIVE_PICTURE";
     public final static String MSG_RECEIVE_VOICE                    = "MSG_RECEIVE_VOICE";
 
+    public final static String MSG_ONLINE_LIST                      = "MSG_ONLINE_LIST";
+    public final static String MSG_TEXT                             = "MSG_TEXT";
+    public final static String MSG_IMG                              = "MSG_IMG";
+    public final static String MSG_VOICE                            = "MSG_VOICE";
+    public final static String MSG_FILE                             = "MSG_FILE";
+
 }
