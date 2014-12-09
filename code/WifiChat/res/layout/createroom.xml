@@ -1,0 +1,73 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#666666"
+    android:orientation="vertical"
+    >
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <TextView 
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textSize="16dip"
+	        android:text="Roomname:"
+        />
+        <EditText 
+            android:id="@+id/roomname"
+            android:layout_width="0dip"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:hint="input room name"
+            />
+    </LinearLayout>
+     <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+        <TextView 
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:textSize="16dip"
+	        android:text="Password:  "
+        />
+        <EditText 
+            android:id="@+id/password"
+            android:layout_width="0dip"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:password="true"
+	        android:hint="input password"
+            />
+    </LinearLayout>
+    <LinearLayout 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        >
+        <Button 
+            android:id="@+id/room_login"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text=" Login "
+	        android:layout_gravity="center"
+        />
+        <TextView 
+            android:layout_width="50dp"
+	        android:layout_height="wrap_content"
+            />
+        <Button 
+            android:id="@+id/room_cancel"
+            android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Cancel"
+	        android:layout_gravity="center"
+            />
+    </LinearLayout>
+</LinearLayout>
