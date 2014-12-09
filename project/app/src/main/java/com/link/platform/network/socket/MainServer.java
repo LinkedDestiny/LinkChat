@@ -15,8 +15,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by danyang.ldy on 2014/12/8.
@@ -36,6 +38,7 @@ public class MainServer implements Runnable {
     private Selector selector;
 
     private IController controller;
+    private Map<Socket, ByteBuffer> buffer_map;
     private ByteBuffer buffer;
 
     private Thread thread;
@@ -44,7 +47,7 @@ public class MainServer implements Runnable {
         this.port = port;
         this.controller = controller;
 
-        buffer = ByteBuffer.allocate(Utils.BUFFER_SIZE);
+        buffer_map = new HashMap<Socket, ByteBuffer>();
         connect_list = new ArrayList<Socket>();
 
     }
@@ -106,13 +109,15 @@ public class MainServer implements Runnable {
 
     }
 
-    public int send(Socket fd, String message) throws IOException {
+    public int send(Socket fd, byte[] message) throws IOException {
         SocketChannel channel = fd.getChannel();
         if( channel == null )
             return Error.IO_NO_CHANNEL;
 
-        ByteBuffer temp = ByteBuffer.wrap(message.getBytes());
-
+        ByteBuffer temp = ByteBuffer.allocate( 4 + message.length );
+        temp.putInt( message.length );
+        temp.put( message );
+        temp.flip();
         long length = channel.write(temp);
         if( length > 0 ) {
             return Error.IO_SUCCESS;
@@ -168,6 +173,7 @@ public class MainServer implements Runnable {
                 throw new IOException("accpet failed");
             }
             connect_list.add(channel.socket());
+            buffer_map.put( channel.socket() , ByteBuffer.allocate(Utils.BUFFER_SIZE));
             controller.onConnect(channel.socket());
 
             channel.configureBlocking(false);
@@ -180,6 +186,7 @@ public class MainServer implements Runnable {
             Log.d(TAG, "SelectionKey Reading ...");
 
             SocketChannel channel = (SocketChannel) key.channel();
+            buffer = buffer_map.get(channel.socket());
 
             // TODO 包完整性校验
             int errno = IOHelper.read(channel, buffer);
@@ -189,9 +196,20 @@ public class MainServer implements Runnable {
                 connect_list.remove(channel.socket());
                 channel.close();
 
-            } else {
-                controller.onReceive(channel.socket(), buffer.asCharBuffer().toString());
+            } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
+                channel.configureBlocking(false);
+                channel.register(selector, SelectionKey.OP_READ);
+            } else if( errno == Error.IO_FAILURE ) {
 
+            } else {
+                byte[] buff = new byte[errno];
+                buffer.get( buff );
+                controller.onReceive(channel.socket(), buff);
+                if( !buffer.hasRemaining() ) {
+                    buffer.clear();
+                } else {
+                    buffer.compact();
+                }
                 channel.configureBlocking(false);
                 channel.register(selector, SelectionKey.OP_READ);
             }

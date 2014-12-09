@@ -128,10 +128,26 @@ public class MainClient implements Runnable {
             SocketChannel channel = (SocketChannel) key.channel();
 
             // TODO 包完整性校验
-            IOHelper.read(channel, buffer);
+            int errno = IOHelper.read(channel, buffer);
+            if( errno == Error.IO_CLOSE ) {
 
-            iClient.onReceive(buffer.asCharBuffer().toString());
+                return;
+            } else if( errno == Error.IO_FAILURE ) {
 
+                return;
+            } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
+
+            } else {
+                byte[] buff = new byte[errno];
+                buffer.get( buff );
+                iClient.onReceive(buff);
+
+                if( !buffer.hasRemaining() ) {
+                    buffer.clear();
+                } else {
+                    buffer.compact();
+                }
+            }
             channel.configureBlocking(false);
             channel.register(selector, SelectionKey.OP_READ);
         }

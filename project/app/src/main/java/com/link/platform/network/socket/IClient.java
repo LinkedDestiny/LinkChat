@@ -5,7 +5,7 @@ package com.link.platform.network.socket;
  */
 public interface IClient {
 
-    public void onReceive(String message);
+    public void onReceive(byte[] message);
 
     public void onError(int errno);
 }

@@ -19,8 +19,20 @@ public class IOHelper {
 
         long count = channel.read(buffer);
         if ( count > 0 ) {
+            int position = buffer.position();
             buffer.flip();
-            return Error.IO_SUCCESS;
+            int readn = buffer.limit() - buffer.position();
+            if( readn > 4 ) {
+                int len = buffer.getInt(0);
+                if( ( buffer.limit() - buffer.position() ) < len ) {
+                    buffer.reset();
+                    buffer.position(position);
+                    return Error.IO_PROTOCOL_NO_COMPLETE;
+                }
+                return len;
+            } else {
+                return Error.IO_PROTOCOL_NO_COMPLETE;
+            }
         } else if( count == -1 ) {
             return Error.IO_CLOSE;
         } else {

@@ -9,7 +9,7 @@ public interface IController {
 
     public void onConnect(Socket fd);
 
-    public void onReceive(Socket fd, String message);
+    public void onReceive(Socket fd, byte[] message);
 
     public void onClose(Socket fd);
 }

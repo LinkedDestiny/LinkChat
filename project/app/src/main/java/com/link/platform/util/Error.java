@@ -5,9 +5,10 @@ package com.link.platform.util;
  */
 public class Error {
 
-    public final static int IO_SUCCESS = 0;
-    public final static int IO_FAILURE = -1;
-    public final static int IO_CLOSE = -2;
-    public final static int IO_NO_CHANNEL = -3;
+    public final static int IO_SUCCESS                  = 0;
+    public final static int IO_FAILURE                  = -1;
+    public final static int IO_CLOSE                    = -2;
+    public final static int IO_NO_CHANNEL               = -3;
+    public final static int IO_PROTOCOL_NO_COMPLETE     = -4;
 
 }

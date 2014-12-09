@@ -25,7 +25,7 @@ public class BaseController implements IController {
     }
 
     @Override
-    public void onReceive(Socket fd, String message) {
+    public void onReceive(Socket fd, byte[] message) {
         List<Socket> connect_list = server.getConnect_list();
         Iterator<Socket> iter = connect_list.iterator();
 

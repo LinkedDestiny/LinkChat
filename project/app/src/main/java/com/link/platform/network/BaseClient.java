@@ -15,7 +15,7 @@ public class BaseClient implements IClient {
     }
 
     @Override
-    public void onReceive(String message) {
+    public void onReceive(byte[] message) {
 
     }
 
