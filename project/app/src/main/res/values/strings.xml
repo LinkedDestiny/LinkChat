@@ -8,5 +8,10 @@
     <string name="login_hint">请输入昵称</string>
     <string name="login_remark">昵称</string>
     <string name="title_activity_welcome">WelcomeActivity</string>
+    <string name="search_text_hint">搜索房间</string>
+    <string name="title_activity_create_room">CreateRoomActivity</string>
+    <string name="create_room_help">创建一个聊天室，如果密码为空，则任何人都可进入房间</string>
+    <string name="create_room_hint">创建聊天室会关闭WiFi功能，请注意</string>
+    <string name="title_activity_conversation">ConversationActivity</string>
 
 </resources>

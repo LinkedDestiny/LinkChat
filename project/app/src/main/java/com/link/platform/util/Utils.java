@@ -15,6 +15,7 @@ public class Utils {
 
 
     public final static String WIFI_PREFIX = "Linked";
+    public final static String DEFAULT_REMARK = "天一宝宝";
 
     public static int WIFI_AP_STATE_UNKNOWN = -1;
     public static int WIFI_AP_STATE_DISABLING = 0;
@@ -25,4 +26,8 @@ public class Utils {
 
     public final static int BUFFER_SIZE = 8192;
     public final static long SELECT_TIMEOUT = 60 * 1000;
+
+    public static String PATH;
+
+    public final static String LOCAL_SETTING = "local_settings";
 }

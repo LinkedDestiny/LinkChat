@@ -25,4 +25,9 @@
         <item name="android:dividerHeight">1dp</item>
     </style>
 
+    <style name="help_text_style">
+        <item name="android:duplicateParentState">true</item>
+        <item name="android:textColor">#ccc</item>
+        <item name="android:textSize">16.0sp</item>
+    </style>
 </resources>

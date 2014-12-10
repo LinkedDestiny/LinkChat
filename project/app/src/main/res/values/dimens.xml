@@ -2,4 +2,7 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
+
+    <dimen name="search_icon_size">18.6dip</dimen>
+    <dimen name="common_unit_margin">8.0dip</dimen>
 </resources>

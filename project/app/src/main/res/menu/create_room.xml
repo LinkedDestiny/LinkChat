@@ -1,0 +1,8 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <item android:id="@+id/action_next"
+        android:title="@string/create_room_help"
+        android:icon="@drawable/next"
+        android:orderInCategory="100"
+        android:showAsAction="always" />
+</menu>

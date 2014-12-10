@@ -9,12 +9,17 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.link.platform.MainApplication;
+import com.link.platform.message.MessageCenter;
+import com.link.platform.message.MessageTable;
+import com.link.platform.message.MessageWithObject;
 import com.link.platform.util.UIHelper;
 import com.link.platform.util.Utils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by danyang.ldy on 2014/12/8.
@@ -24,6 +29,7 @@ public class WiFiManager {
     public final static String TAG = "WiFiManager";
 
     public static WiFiManager Instance = null;
+
 
     public static WiFiManager getInstance() {
         if( Instance == null ) {
@@ -39,18 +45,27 @@ public class WiFiManager {
     private WifiManager wifi;
     private WifiInfo info;
     private List<ScanResult> list = new ArrayList<ScanResult>();
+    private Context context;
 
     private WiFiManager() {
         wifi = (WifiManager) MainApplication.getInstance().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         info = wifi.getConnectionInfo();
     }
 
+    public void setContext( Context context ) {
+        this.context = context;
+    }
+
+    public void clear() {
+        this.context = null;
+    }
+
     public void openWiFi() {
-        new WifiAsyncTask(MainApplication.getInstance().getApplicationContext() , true ).execute();
+        new WifiAsyncTask(context , true ).execute();
     }
 
     public void closeWiFi() {
-        new WifiAsyncTask(MainApplication.getInstance().getApplicationContext() , false ).execute();
+        new WifiAsyncTask(context , false ).execute();
     }
 
     public boolean isOpen() {
@@ -90,6 +105,15 @@ public class WiFiManager {
                 iter.remove();
             }
         }
+        Set set = new HashSet();
+        List newList = new ArrayList();
+        for (Iterator it = list.iterator(); it.hasNext();) {
+            Object element = it.next();
+            if (set.add(element))
+                newList.add(element);
+        }
+        list.clear();
+        list.addAll(newList);
         return list;
     }
 
@@ -137,6 +161,11 @@ public class WiFiManager {
             d.dismiss();
 
             UIHelper.makeToast("Turning WiFi " + (mMode?"on":"off") + ( result ? " successful." : "failed."));
+
+            MessageWithObject msg = new MessageWithObject();
+            msg.setMsgId( mMode ? MessageTable.MSG_OPEN_WIFI_FINISH : MessageTable.MSG_CLOSE_WIFI_FINISH );
+            msg.setObject( result );
+            MessageCenter.getInstance().sendMessage(msg);
         }
 
         @Override

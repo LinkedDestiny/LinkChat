@@ -40,7 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="?android:attr/listDivider"
-        android:layout_above="@+id/activity_submit_phone_button"
+        android:layout_above="@+id/activity_submit_button"
         >
     </View>
 
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="48dp"
         android:layout_alignParentBottom="true"
-        android:id="@+id/activity_submit_phone_button"
+        android:id="@+id/activity_submit_button"
         android:text="确定"
         style="@android:style/Widget.Holo.Button.Borderless"
         android:textColor="@color/new_title_color"

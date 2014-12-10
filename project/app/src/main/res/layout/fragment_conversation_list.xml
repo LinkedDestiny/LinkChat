@@ -4,20 +4,15 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     >
-
+    <include layout="@layout/ui_search_bar"></include>
     <ListView
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="16dp"
         android:id="@+id/conversation_list"
         android:scrollbars="none"
-        android:dividerHeight="0dp"
-        android:divider="@android:color/white"
+        android:dividerHeight="1dp"
+        android:divider="#ccc"
         >
-
         </ListView>
 </LinearLayout>

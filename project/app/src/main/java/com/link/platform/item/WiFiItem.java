@@ -5,4 +5,15 @@ package com.link.platform.item;
  */
 public class WiFiItem {
 
+    public String name;
+    public boolean isLock;
+
+    public WiFiItem() {
+
+    }
+
+    public WiFiItem(String name, boolean isLock) {
+        this.name = name;
+        this.isLock = isLock;
+    }
 }

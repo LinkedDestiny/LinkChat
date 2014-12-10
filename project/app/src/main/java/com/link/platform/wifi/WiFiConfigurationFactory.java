@@ -34,6 +34,7 @@ public class WiFiConfigurationFactory {
 
     public WifiConfiguration getConfiguration( WifiConfiguration config , String name,  String password ) {
         config.SSID = Utils.WIFI_PREFIX + name;
+        config.BSSID = Utils.WIFI_PREFIX + name;
         String device = android.os.Build.MODEL.substring(0, 3);
         try {
             try {
@@ -52,7 +53,7 @@ public class WiFiConfigurationFactory {
         }
     }
 
-    private WifiConfiguration getDefaultConfiguration( WifiConfiguration config , String password ) {
+    public WifiConfiguration getDefaultConfiguration( WifiConfiguration config , String password ) {
         config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
         config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE);
         if( !password.equals("") ){
@@ -64,10 +65,10 @@ public class WiFiConfigurationFactory {
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         }
-        return null;
+        return config;
     }
 
-    private WifiConfiguration getHTCConfiguration( WifiConfiguration config , String password ) throws Exception {
+    public WifiConfiguration getHTCConfiguration( WifiConfiguration config , String password ) throws Exception {
         Field localField;
         localField = WifiConfiguration.class.getDeclaredField("mWifiApProfile");
         localField.setAccessible(true);
@@ -98,7 +99,7 @@ public class WiFiConfigurationFactory {
             }
 
         }
-        return null;
+        return config;
     }
 
     private void setField( Object localObject , String name , Object value ) throws Exception {

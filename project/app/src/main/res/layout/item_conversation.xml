@@ -3,9 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_marginTop="12dip"
-    android:layout_marginRight="12dip"
-    android:layout_marginLeft="12dip"
+    android:padding="12dip"
     >
     <ImageView
         android:layout_width="45dip"
@@ -24,19 +22,9 @@
             android:id="@+id/item_conversation_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="16.0dip"
+            android:textSize="20.0dip"
             android:text="chatroom"
             android:singleLine="true"
-            />
-
-        <TextView
-            android:id="@+id/item_last_message"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:singleLine="true"
-            android:text="last message"
-            android:textSize="14dip"
-            android:textColor="@color/second_grade_color"
             />
         </LinearLayout>
     <LinearLayout
@@ -46,23 +34,11 @@
         android:orientation="vertical"
         >
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/item_conversation_time"
-            android:text="12:38"
-            android:textColor="@color/second_grade_color"
-            />
-        <TextView
-            android:id="@+id/item_unread"
-            android:layout_width="16dip"
-            android:layout_height="16dip"
-            android:text="99"
-            android:textSize="12dip"
-            android:textColor="@android:color/white"
-            android:gravity="center"
-            android:background="@drawable/ui_msg_num"
-            android:layout_gravity="center"
+        <ImageView
+            android:layout_width="20dip"
+            android:layout_height="20dip"
+            android:id="@+id/item_conversation_open"
+            android:src="@drawable/ali_pwd_icon"
             />
         </LinearLayout>
 </LinearLayout>

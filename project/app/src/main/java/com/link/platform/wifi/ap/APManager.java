@@ -6,9 +6,13 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
+import android.os.Message;
 import android.util.Log;
 
 import com.link.platform.MainApplication;
+import com.link.platform.message.MessageCenter;
+import com.link.platform.message.MessageTable;
+import com.link.platform.message.MessageWithObject;
 import com.link.platform.util.UIHelper;
 import com.link.platform.util.Utils;
 import com.link.platform.wifi.WiFiConfigurationFactory;
@@ -53,14 +57,14 @@ public class APManager {
         this.ap_password = password;
     }
 
-    public void toggleWiFiAP() {
+    public void toggleWiFiAP( Context context ) {
 
         boolean wifiApIsOn = getWiFiAPState() == Utils.WIFI_AP_STATE_ENABLED
                 || getWiFiAPState() == Utils.WIFI_AP_STATE_ENABLING;
 
         Log.d(TAG, "WifiAPState : " + wifiApIsOn);
 
-        new APAsyncTask( MainApplication.getContext() , !wifiApIsOn ).execute();
+        new APAsyncTask( context , !wifiApIsOn ).execute();
     }
 
     public int getWiFiAPState() {
@@ -127,6 +131,7 @@ public class APManager {
             wifi.setWifiEnabled(false);
 
             Method method1 = wifi.getClass().getMethod("setWifiApEnabled", WifiConfiguration.class, boolean.class);
+            Log.d(TAG , config.SSID);
             method1.invoke(wifi, config, enabled); // true
 
             Method method2 = wifi.getClass().getMethod("getWifiApState");
@@ -208,10 +213,18 @@ public class APManager {
 
         @Override
         protected void onPostExecute(Object o) {
-            boolean result = Boolean.valueOf(o.toString());
+            boolean result = true;
+            if( getWiFiAPState() == Utils.WIFI_AP_STATE_FAILED ) {
+                result = false;
+            }
+
             d.dismiss();
 
             UIHelper.makeToast("Turning WiFi " + (mMode ? "on" : "off") + (result ? " successful." : "failed."));
+            MessageWithObject msg = new MessageWithObject();
+            msg.setMsgId( mMode ? MessageTable.MSG_OPEN_AP_FINISH : MessageTable.MSG_CLOSE_AP_FINISH );
+            msg.setObject(result);
+            MessageCenter.getInstance().sendMessage(msg);
         }
 
         @Override
