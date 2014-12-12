@@ -1,16 +1,65 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.link.platform.activity.ConversationActivity">
+    >
 
-    <TextView
-        android:text="@string/hello_world"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+    <include layout="@layout/ui_action_bar"></include>
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/toolbar"
+        android:layout_alignParentBottom="true"
+        android:background="#ebecee"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="52dip"
+            android:gravity="center_vertical"
+            >
+            <ImageView
+                android:id="@+id/emoj"
+                android:layout_width="40dip"
+                android:layout_height="40dip"
+                android:src="@drawable/emoj"
+                />
+            <ImageView
+                android:id="@+id/add_more"
+                android:layout_width="40dip"
+                android:layout_height="40dip"
+                android:src="@drawable/add_more"
+                />
+            <EditText
+                android:id="@+id/message_input"
+                android:layout_width="0dip"
+                android:layout_height="40dip"
+                android:layout_weight="1"
+                style="@style/chatting_detail_input_text_style"
+                />
+            <ImageView
+                android:id="@+id/send"
+                android:layout_width="64dip"
+                android:layout_height="40dip"
+                android:src="@drawable/voice"
+                android:padding="2dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
+                android:background="@drawable/send_button_background"
+                />
+            </LinearLayout>
+
+        </RelativeLayout>
+    <ListView
+        android:id="@+id/message_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/toolbar"
+        android:layout_marginTop="45dip"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dip"
+        android:scrollbars="none"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        >
+    </ListView>
 </RelativeLayout>

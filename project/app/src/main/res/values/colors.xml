@@ -6,4 +6,29 @@
     <color name="action_bar_text_color">#84b2c7</color>
     <color name="second_grade_color">#ff7f7f7f</color>
     <color name="third_grade_color">#ffa9a9a9</color>
+
+    <color name="transparent">#00000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#333</color>
+    <color name="gray">#808080</color>
+    <color name="red">#FF0000</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="green">#4AC208</color>
+    <color name="blue">#0000FF</color>
+    <color name="graywhite">#F5F5F5</color>
+    <color name="lightblue">#0083FF</color>
+    <color name="orange">#ff6600</color>
+    <color name="hint">#ccc</color>
+
+
+    <color name="tip_gray">#999</color>
+    <color name="content_black">#333</color>
+    <color name="content_gray">#666</color>
+    <color name="content_blue">#1996e6</color>
+    <color name="separator_gray">#eee</color>
+    <color name="separator_deep_gray">#ccc</color>
+    <color name="separator_light_gray">#ddd</color>
+    <color name="background_gray">#efeff4</color>
+    <color name="musk_color">#90909090</color>
+    <color name="error_hint">#ff3333</color>
 </resources>

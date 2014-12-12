@@ -24,18 +24,18 @@
         android:layout_marginTop="208dip"
         />
     <EditText
-        android:layout_below="@+id/login_text"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:singleLine="true"
-        android:textColor="@color/new_title_color"
-        android:layout_marginRight="16dp"
-        android:layout_marginLeft="16dp"
-        android:hint="@string/login_remark"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:id="@+id/activity_login_name_edit"
-        />
+    android:layout_below="@+id/login_text"
+    android:layout_width="match_parent"
+    android:layout_height="48dp"
+    android:singleLine="true"
+    android:textColor="@color/new_title_color"
+    android:layout_marginRight="16dp"
+    android:layout_marginLeft="16dp"
+    android:hint="@string/login_remark"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:id="@+id/activity_login_name_edit"
+    />
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"

@@ -29,5 +29,10 @@ public class Utils {
 
     public static String PATH;
 
+    public final static String STORAGE_PATH = "LinkChat";
+    public final static String IMG_CACHE = "/IMG/";
+    public final static String VOICE_CACHE = "/VOICE/";
+    public final static String FILE_CACHE = "/FILE/";
+
     public final static String LOCAL_SETTING = "local_settings";
 }
