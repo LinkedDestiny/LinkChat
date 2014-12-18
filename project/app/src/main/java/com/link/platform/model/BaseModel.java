@@ -8,9 +8,9 @@ import java.util.List;
  */
 public abstract class BaseModel {
 
-    public static List<BaseModel> pools = new ArrayList<BaseModel>();
+    protected static List<BaseModel> pools = new ArrayList<BaseModel>();
 
-    public static void register(BaseModel model) {
+    protected static void register(BaseModel model) {
         pools.add(model);
     }
 

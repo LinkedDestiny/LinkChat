@@ -7,6 +7,7 @@ import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,11 +32,14 @@ import java.util.List;
 
 public class MainActivity extends Activity implements MessageListenerDelegate , AdapterView.OnItemClickListener {
 
+    public final static String TAG = "MainActivity";
+
     private ListView conversation_listview;
     private ConversationAdapter adapter;
 
     private EditText search_bar;
     private List<WiFiItem> list;
+    private WiFiItem current_wifi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,7 @@ public class MainActivity extends Activity implements MessageListenerDelegate , 
         adapter = new ConversationAdapter(this);
         adapter.setData(null);
         conversation_listview.setAdapter(adapter);
+        conversation_listview.setOnItemClickListener(this);
         search_bar = (EditText)findViewById(R.id.search_bar);
 
         search_bar.addTextChangedListener(mTextWatcher);
@@ -67,6 +72,7 @@ public class MainActivity extends Activity implements MessageListenerDelegate , 
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_OPEN_WIFI_FINISH );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_CLOSE_WIFI_FINISH );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_GET_SCAN_RESULT );
+        MessageCenter.getInstance().registerListener(this , MessageTable.MSG_CONNECT_WIFI_FINISH );
 
         WiFiManager.getInstance().setContext(this);
         WiFiManager.getInstance().openWiFi();
@@ -153,10 +159,24 @@ public class MainActivity extends Activity implements MessageListenerDelegate , 
         else if( id.equals( MessageTable.MSG_CLOSE_WIFI_FINISH) ) {
 
         }
+        else if( id.equals( MessageTable.MSG_CONNECT_WIFI_FINISH) ) {
+            boolean result = Boolean.valueOf( msg.getObject().toString() );
+            if( result && current_wifi != null ) {
+                Intent intent = new Intent(this, ConversationActivity.class);
+                intent.putExtra(ConversationActivity.PARAM_ROOM_NAME , current_wifi.name.substring(6) );
+                intent.putExtra(ConversationActivity.PARAM_IS_HOST, false);
+                startActivity(intent);
+            }
+        }
     }
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+        WiFiManager manager = WiFiManager.getInstance();
+        final WiFiItem item = list.get(i);
+        // TODO password dialog
+        Log.d(TAG, "Join " + item.name);
+        current_wifi = item;
+        manager.addNetWork( manager.CreateWifiConfiguration(item.name , ""));
     }
 }

@@ -7,6 +7,8 @@ import java.nio.ByteBuffer;
  */
 public interface IClient {
 
+    public void onConnect(String IP);
+
     public void onReceive(ByteBuffer message);
 
     public void onError(int errno);

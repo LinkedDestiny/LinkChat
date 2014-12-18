@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.link.platform.util.*;
 import com.link.platform.util.Error;
+import com.link.platform.wifi.wifi.WiFiManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -42,18 +43,18 @@ public class MainClient implements Runnable {
         this.iClient = iClient;
 
         buffer = ByteBuffer.allocate(Utils.BUFFER_SIZE);
-
+        loop = false;
     }
 
     public void start() {
-        if( !loop ) {
-            thread = new Thread( this );
+        if (!loop) {
+            thread = new Thread(this);
             loop = true;
             thread.start();
+
         } else {
             pause = false;
         }
-
     }
 
     public void pause() {
@@ -62,19 +63,44 @@ public class MainClient implements Runnable {
 
     public void stop() {
         loop = false;
+        try {
+            close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void connect() throws IOException {
         selector = Selector.open();
         mainchannel = SocketChannel.open();
+        mainchannel.configureBlocking(true);
         socket = mainchannel.socket();
         // connect to the HostIP
-        socket.connect(new InetSocketAddress( host , port ));
+
+        mainchannel.configureBlocking(false);
+        mainchannel.register(selector, SelectionKey.OP_CONNECT);
+        mainchannel.connect(new InetSocketAddress( host , port ));
+    }
+
+    public int send(byte[] message) throws IOException {
+
+        ByteBuffer temp = ByteBuffer.allocate( 4 + message.length );
+        temp.putInt( message.length );
+        temp.put( message );
+        temp.flip();
+        long length = mainchannel.write(temp);
+        if( length > 0 ) {
+            return Error.IO_SUCCESS;
+        } else {
+            return (int)length;
+        }
+
     }
 
     @Override
     public void run() {
         try{
+            connect();
             while ( loop ) {
                 if ( !pause ) {
                     select();
@@ -90,13 +116,21 @@ public class MainClient implements Runnable {
                 e1.printStackTrace();
             }
         }
+        Log.d(TAG, "Close client");
     }
 
     private void close() throws IOException {
-        socket.close();
-        mainchannel.close();
-        selector.close();
-        buffer.clear();
+        if( socket != null )
+            socket.close();
+
+        if( mainchannel != null )
+            mainchannel.close();
+
+        if( selector != null )
+            selector.close();
+
+        if( buffer != null )
+            buffer.clear();
 
         socket = null;
         mainchannel = null;
@@ -105,7 +139,7 @@ public class MainClient implements Runnable {
     }
 
     private void select() throws IOException {
-        selector.select();
+        selector.select( 30 * 1000 );
 
         if( loop && !pause ) {
             Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
@@ -122,6 +156,17 @@ public class MainClient implements Runnable {
     }
 
     public void handleSelectionKey( SelectionKey key, Selector selector ) throws IOException {
+        if( key.isConnectable() ) {
+            SocketChannel channel = (SocketChannel) key.channel();
+            if (channel.finishConnect()) {
+                iClient.onConnect(IOHelper.ipIntToString(WiFiManager.getInstance().getIP()));
+
+                mainchannel.configureBlocking(false);
+                mainchannel.register(selector, SelectionKey.OP_READ );
+            } else {
+                iClient.onConnect("");
+            }
+        }
         if (key.isReadable()) {
             Log.d(TAG, "SelectionKey Reading ...");
 
@@ -130,14 +175,14 @@ public class MainClient implements Runnable {
             // TODO 包完整性校验
             int errno = IOHelper.read(channel, buffer);
             if( errno == Error.IO_CLOSE ) {
-
+                iClient.onError(errno);
                 return;
             } else if( errno == Error.IO_FAILURE ) {
-
+                iClient.onError(errno);
                 return;
             } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
-
-            } else {
+                return;
+            } else if( errno > 0 ) {
                 byte[] buff = new byte[errno];
                 buffer.get( buff );
                 iClient.onReceive(ByteBuffer.wrap(buff));
@@ -147,6 +192,8 @@ public class MainClient implements Runnable {
                 } else {
                     buffer.compact();
                 }
+            } else {
+
             }
             channel.configureBlocking(false);
             channel.register(selector, SelectionKey.OP_READ);

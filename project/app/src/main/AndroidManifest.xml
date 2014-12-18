@@ -42,8 +42,14 @@
         <activity
             android:name=".activity.ConversationActivity"
             android:theme="@style/NoTitleAppTheme"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden" >
         </activity>
+
+        <service
+            android:name=".network.ServerService"
+            android:enabled="true"
+            android:exported="true" >
+        </service>
     </application>
 
     <!--

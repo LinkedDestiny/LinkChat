@@ -1,10 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:padding="12dip"
+    android:background="@android:color/transparent"
     >
+    <TextView
+        android:id="@+id/online_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14dip"
+        android:textColor="@color/content_gray"
+        android:visibility="gone"
+        android:gravity="center"
+        />
 
+    <RelativeLayout
+        android:id="@+id/message_area"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
     <ImageView
         android:id="@+id/left_head"
         android:layout_width="40dip"
@@ -26,7 +41,8 @@
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/left_head"
         android:layout_toLeftOf="@+id/right_head"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        >
 
         <TextView
             android:id="@+id/message_sender_name"
@@ -38,16 +54,19 @@
             android:textSize="12dp"
             android:textColor="@color/content_gray"
             android:text="tribeName"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            />
 
         <RelativeLayout
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
-            android:minHeight="40dip">
+            android:minHeight="40dip"
+            android:layout_marginTop="4dip"
+            >
 
             <TextView
                 android:id="@+id/textView_message"
-                android:textSize="14dp"
+                android:textSize="16dp"
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_alignParentLeft="true"
@@ -55,7 +74,10 @@
                 android:text="message"
                 android:linksClickable="false"
                 android:textColorLink="@color/content_black"
-                android:autoLink="web"/>
+                android:autoLink="web"
+                android:padding="12dip"
+
+                />
 
             <ImageView
                 android:contentDescription=""
@@ -66,7 +88,6 @@
                 android:scaleType="fitXY"
                 android:id="@+id/message_img"/>
         </RelativeLayout>
-
     </LinearLayout>
-
+    </RelativeLayout>
 </RelativeLayout>

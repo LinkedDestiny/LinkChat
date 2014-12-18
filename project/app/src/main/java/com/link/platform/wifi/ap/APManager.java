@@ -57,14 +57,9 @@ public class APManager {
         this.ap_password = password;
     }
 
-    public void toggleWiFiAP( Context context ) {
-
-        boolean wifiApIsOn = getWiFiAPState() == Utils.WIFI_AP_STATE_ENABLED
-                || getWiFiAPState() == Utils.WIFI_AP_STATE_ENABLING;
-
-        Log.d(TAG, "WifiAPState : " + wifiApIsOn);
-
-        new APAsyncTask( context , !wifiApIsOn ).execute();
+    public void toggleWiFiAP( Context context , boolean enable) {
+        Log.d(TAG, "WifiAPState : " + enable);
+        new APAsyncTask( context , enable ).execute();
     }
 
     public int getWiFiAPState() {
@@ -190,7 +185,6 @@ public class APManager {
             }
             Log.d(TAG, (enabled?"enabling":"disabling") +" wifi ap: done, pass: " + (10-loopMax));
         }
-
         return state;
     }
 
@@ -223,7 +217,7 @@ public class APManager {
             UIHelper.makeToast("Turning WiFi " + (mMode ? "on" : "off") + (result ? " successful." : "failed."));
             MessageWithObject msg = new MessageWithObject();
             msg.setMsgId( mMode ? MessageTable.MSG_OPEN_AP_FINISH : MessageTable.MSG_CLOSE_AP_FINISH );
-            msg.setObject(result);
+            msg.setObject( mMode ? result : true);
             MessageCenter.getInstance().sendMessage(msg);
         }
 

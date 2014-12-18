@@ -35,4 +35,10 @@ public class MessageItem {
         return new MessageItem( from, isOwn , content , MsgType.MSG_VOICE );
     }
 
+    public static MessageItem onlineMessage( String from, boolean isOwn, String content ) {
+        return new MessageItem( from, isOwn , content , MsgType.MSG_ONLINE );
+    }
+    public static MessageItem offlineMessage( String from, boolean isOwn, String content ) {
+        return new MessageItem( from, isOwn , content , MsgType.MSG_OFFLINE );
+    }
 }

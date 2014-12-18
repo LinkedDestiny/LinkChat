@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="45dip"
     android:gravity="center_vertical"
-    android:background="#f8f8f8"
+    android:background="#18b4ed"
     android:id="@+id/title_action_bar"
     android:orientation="vertical"
     >
@@ -11,26 +11,30 @@
         android:layout_width="match_parent"
         android:layout_height="45dip"
         android:gravity="center_vertical"
-        android:background="#f8f8f8">
+        android:background="#18b4ed">
         <ImageView
-            android:id="@+id/back"
+            android:id="@+id/title_back"
             android:layout_width="40dip"
             android:layout_height="40dip"
-            android:src="@drawable/back"
+            android:src="@drawable/while_back"
             android:padding="5dip"
+            android:layout_centerVertical="true"
             />
         <TextView
             android:id="@+id/title"
             style="@style/toolbarTitle"
             android:text="Room"
+            android:layout_centerVertical="true"
             />
 
         <ImageView
             android:id="@+id/settings"
-            android:layout_width="40dip"
-            android:layout_height="40dip"
-            android:src="@drawable/profile"
+            android:layout_width="24dip"
+            android:layout_height="24dip"
+            android:src="@drawable/settings"
             android:layout_alignParentRight="true"
+            android:layout_marginRight="12dip"
+            android:layout_centerVertical="true"
             />
         </RelativeLayout>
     <View

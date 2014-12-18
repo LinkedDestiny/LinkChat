@@ -13,6 +13,8 @@ import com.link.platform.message.MessageCenter;
 import com.link.platform.message.MessageListenerDelegate;
 import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
+import com.link.platform.network.BaseController;
+import com.link.platform.network.ServerService;
 import com.link.platform.util.UIHelper;
 import com.link.platform.wifi.ap.APManager;
 import com.link.platform.wifi.wifi.WiFiManager;
@@ -60,7 +62,7 @@ public class CreateRoomActivity extends Activity implements MessageListenerDeleg
         int id = item.getItemId();
         if (id == R.id.action_next) {
             APManager.getInstance().setWiFiAPInfo( name.getText().toString(), password.getText().toString() );
-            APManager.getInstance().toggleWiFiAP(this);
+            APManager.getInstance().toggleWiFiAP(this, true);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -78,8 +80,14 @@ public class CreateRoomActivity extends Activity implements MessageListenerDeleg
             MessageWithObject msg = (MessageWithObject)message;
             boolean result = Boolean.valueOf(msg.getObject().toString());
             if( result ) {
+                ServerService.isInitServer = true;
+                Intent server = new Intent(this, ServerService.class);
+                startService(server);
+
                 Intent intent = new Intent(this , ConversationActivity.class );
                 intent.putExtra(ConversationActivity.PARAM_ROOM_NAME , name.getText().toString() );
+                intent.putExtra(ConversationActivity.PARAM_IS_HOST, true);
+
                 startActivity(intent);
             } else {
                 UIHelper.makeToast("创建失败！请重试...");

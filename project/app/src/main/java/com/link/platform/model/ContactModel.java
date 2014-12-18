@@ -2,9 +2,11 @@ package com.link.platform.model;
 
 import com.link.platform.item.ContactItem;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -25,39 +27,30 @@ public class ContactModel extends BaseModel {
         return Instance;
     }
 
-    private Set<ContactItem> contacts;
+    private Map<String, ContactItem> contacts;
 
     private ContactModel() {
-        contacts = new HashSet<ContactItem>();
+        contacts = new HashMap<String, ContactItem>();
+        register(this);
     }
 
     public void addContact(ContactItem contact) {
-        contacts.add(contact);
+        contacts.put(contact.IP, contact);
     }
 
-    public void addContacts(List<ContactItem> list) {
-        contacts.addAll(list);
+    public void addContacts(Map<String, ContactItem> list, boolean clear) {
+        if( clear ) {
+            contacts.clear();
+        }
+        contacts.putAll(list);
     }
 
     public void removeContact(String IP) {
-        Iterator<ContactItem> iter = contacts.iterator();
-        while( iter.hasNext() ) {
-            if( IP.equals( iter.next().IP ) ) {
-                iter.remove();
-                break;
-            }
-        }
+        contacts.remove( IP );
     }
 
     public ContactItem getContact(String IP) {
-        Iterator<ContactItem> iter = contacts.iterator();
-        while( iter.hasNext() ) {
-            ContactItem item = iter.next();
-            if( IP.equals( item.IP ) ) {
-                return item;
-            }
-        }
-        return null;
+        return contacts.get(IP);
     }
 
     @Override

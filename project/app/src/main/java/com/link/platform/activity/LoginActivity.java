@@ -41,6 +41,8 @@ public class LoginActivity extends Activity {
                 finish();
             }
         });
+        input_name.setText(LocalSetting.getInstance().getLocalName());
+
     }
 
 

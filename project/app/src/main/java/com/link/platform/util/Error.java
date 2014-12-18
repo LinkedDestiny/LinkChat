@@ -10,5 +10,6 @@ public class Error {
     public final static int IO_CLOSE                    = -2;
     public final static int IO_NO_CHANNEL               = -3;
     public final static int IO_PROTOCOL_NO_COMPLETE     = -4;
+    public final static int IO_CONNECT_ERROR            = -5;
 
 }

@@ -70,8 +70,8 @@ public class MainServer implements Runnable {
     public void start() {
         if( !loop ) {
             thread = new Thread( this );
-            thread.start();
             loop = true;
+            thread.start();
         } else {
             pause = false;
         }
@@ -84,6 +84,11 @@ public class MainServer implements Runnable {
 
     public void stop() {
         loop = false;
+        try {
+            close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public List<Socket> getConnect_list() {
@@ -95,10 +100,11 @@ public class MainServer implements Runnable {
         try{
             while ( loop ) {
                 if ( !pause ) {
+                    Log.d(TAG, "Main loop: select...");
                     select();
                 }
             }
-            close();
+            //close();
         }catch( IOException e ){
             e.printStackTrace();
             try {
@@ -107,7 +113,7 @@ public class MainServer implements Runnable {
                 e1.printStackTrace();
             }
         }
-
+        Log.d(TAG, "close server thread");
     }
 
     public int send(Socket fd, byte[] message) throws IOException {
@@ -123,16 +129,24 @@ public class MainServer implements Runnable {
         if( length > 0 ) {
             return Error.IO_SUCCESS;
         } else {
-            return Error.IO_FAILURE;
+            return (int)length;
         }
 
     }
 
     private void close() throws IOException {
-        server.close();
-        mainchannel.close();
-        selector.close();
-        buffer.clear();
+        if( server != null )
+            server.close();
+
+        if( mainchannel != null )
+            mainchannel.close();
+
+        if( selector != null )
+            selector.close();
+
+        buffer_map.clear();
+        if( buffer != null )
+            buffer.clear();
 
         server = null;
         mainchannel = null;
@@ -141,7 +155,7 @@ public class MainServer implements Runnable {
     }
 
     private void select() throws IOException {
-        selector.select();
+        selector.select( 30 * 1000 );
 
         if( loop && !pause ) {
             Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
@@ -202,7 +216,7 @@ public class MainServer implements Runnable {
                 channel.register(selector, SelectionKey.OP_READ);
             } else if( errno == Error.IO_FAILURE ) {
 
-            } else {
+            } else if( errno > 0 ){
                 byte[] buff = new byte[errno];
                 buffer.get( buff );
 
@@ -214,6 +228,8 @@ public class MainServer implements Runnable {
                 }
                 channel.configureBlocking(false);
                 channel.register(selector, SelectionKey.OP_READ);
+            } else {
+                Log.e(TAG , "errno :" + errno);
             }
         }
     }

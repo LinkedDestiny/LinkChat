@@ -35,4 +35,6 @@ public class Utils {
     public final static String FILE_CACHE = "/FILE/";
 
     public final static String LOCAL_SETTING = "local_settings";
+
+    public final static int CHAT_PORT = 9501;
 }

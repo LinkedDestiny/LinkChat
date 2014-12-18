@@ -1,6 +1,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/chat_background"
     >
 
     <include layout="@layout/ui_action_bar"></include>
@@ -36,15 +37,30 @@
                 android:layout_weight="1"
                 style="@style/chatting_detail_input_text_style"
                 />
-            <ImageView
+            <TextView
                 android:id="@+id/send"
                 android:layout_width="64dip"
                 android:layout_height="40dip"
-                android:src="@drawable/voice"
                 android:padding="2dip"
+                android:text="发送"
+                android:textColor="@color/white"
+                android:textSize="16dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginRight="10dip"
+                android:background="@drawable/send_button"
+                android:gravity="center"
+                android:visibility="gone"
+                />
+            <ImageView
+                android:id="@+id/voice_send"
+                android:layout_width="64dip"
+                android:layout_height="40dip"
+                android:padding="2dip"
+                android:src="@drawable/voice_nor"
                 android:layout_marginLeft="10dip"
                 android:layout_marginRight="10dip"
                 android:background="@drawable/send_button_background"
+                android:gravity="center"
                 />
             </LinearLayout>
 

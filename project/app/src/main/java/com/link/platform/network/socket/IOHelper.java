@@ -25,9 +25,9 @@ public class IOHelper {
             buffer.flip();
             int readn = buffer.limit() - buffer.position();
             if( readn > 4 ) {
-                int len = buffer.getInt(0);
+                int len = buffer.getInt();
                 if( ( buffer.limit() - buffer.position() ) < len ) {
-                    buffer.reset();
+                    buffer.clear();
                     buffer.position(position);
                     return Error.IO_PROTOCOL_NO_COMPLETE;
                 }

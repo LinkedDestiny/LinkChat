@@ -84,7 +84,7 @@ public class ConversationAdapter extends BaseAdapter implements Filterable {
             viewHolder = (ViewHolder)view.getTag();
         }
         WiFiItem item = current_list.get(i);
-        viewHolder.name.setText( item.name );
+        viewHolder.name.setText( item.name.substring(6) );
         if( item.isLock ) {
             viewHolder.isLock.setVisibility(View.VISIBLE);
         } else {
