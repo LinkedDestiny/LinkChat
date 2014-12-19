@@ -6,7 +6,8 @@ import com.link.platform.item.ContactItem;
 import com.link.platform.network.socket.IController;
 import com.link.platform.network.socket.IOHelper;
 import com.link.platform.network.socket.MainServer;
-import com.link.platform.util.*;
+import com.link.platform.network.util.MsgType;
+import com.link.platform.network.util.ProtocolFactory;
 import com.link.platform.util.Error;
 
 import java.io.IOException;

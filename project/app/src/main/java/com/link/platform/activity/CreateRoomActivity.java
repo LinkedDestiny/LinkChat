@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.link.platform.R;
@@ -15,6 +17,7 @@ import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
 import com.link.platform.network.BaseController;
 import com.link.platform.network.ServerService;
+import com.link.platform.util.StringUtil;
 import com.link.platform.util.UIHelper;
 import com.link.platform.wifi.ap.APManager;
 import com.link.platform.wifi.wifi.WiFiManager;
@@ -61,11 +64,25 @@ public class CreateRoomActivity extends Activity implements MessageListenerDeleg
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_next) {
-            APManager.getInstance().setWiFiAPInfo( name.getText().toString(), password.getText().toString() );
+            String password = this.password.getText().toString();
+            if( !StringUtil.isBlank(password) && password.length() < 8 ) {
+                UIHelper.makeToast("密码长度不能小于8位");
+                return true;
+            }
+            APManager.getInstance().setWiFiAPInfo( name.getText().toString(), password );
             APManager.getInstance().toggleWiFiAP(this, true);
+            hideKeyBoard();
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    private void hideKeyBoard() {
+        View view = getCurrentFocus();
+        if (view != null) {
+            ((InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     @Override
@@ -89,6 +106,7 @@ public class CreateRoomActivity extends Activity implements MessageListenerDeleg
                 intent.putExtra(ConversationActivity.PARAM_IS_HOST, true);
 
                 startActivity(intent);
+                this.finish();
             } else {
                 UIHelper.makeToast("创建失败！请重试...");
             }

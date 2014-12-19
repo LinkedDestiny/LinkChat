@@ -2,12 +2,16 @@ package com.link.platform.activity;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,6 +27,8 @@ import com.link.platform.message.MessageListenerDelegate;
 import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
 import com.link.platform.ui.adapter.ConversationAdapter;
+import com.link.platform.ui.component.LoadMoreListView;
+import com.link.platform.util.UIHelper;
 import com.link.platform.util.Utils;
 import com.link.platform.wifi.wifi.WiFiManager;
 
@@ -30,24 +36,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends Activity implements MessageListenerDelegate , AdapterView.OnItemClickListener {
+public class MainActivity extends Activity implements MessageListenerDelegate , AdapterView.OnItemClickListener, LoadMoreListView.OnRefreshListener {
 
     public final static String TAG = "MainActivity";
 
-    private ListView conversation_listview;
+    private LoadMoreListView conversation_listview;
     private ConversationAdapter adapter;
 
     private EditText search_bar;
     private List<WiFiItem> list;
     private WiFiItem current_wifi;
+    private ProgressDialog d;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_conversation_list);
 
-        conversation_listview = (ListView)findViewById(R.id.conversation_list);
-        conversation_listview.setOnItemClickListener(this);
+        conversation_listview = (LoadMoreListView)findViewById(R.id.conversation_list);
+        conversation_listview.setPullRefreshEnable(true);
+        conversation_listview.setOnRefreshListener(this);
+
         adapter = new ConversationAdapter(this);
         adapter.setData(null);
         conversation_listview.setAdapter(adapter);
@@ -63,6 +72,9 @@ public class MainActivity extends Activity implements MessageListenerDelegate , 
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
 
+        d = new ProgressDialog(this);
+        d.setTitle("正在搜索附近的房间");
+        d.setMessage("请等待...");
     }
 
     @Override
@@ -139,6 +151,7 @@ public class MainActivity extends Activity implements MessageListenerDelegate , 
             boolean result = Boolean.valueOf( msg.getObject().toString() );
             if( result ) {
                 WiFiManager.getInstance().StartScan();
+                d.show();
             }
         }
         else if( id.equals( MessageTable.MSG_GET_SCAN_RESULT ) ) {
@@ -155,6 +168,8 @@ public class MainActivity extends Activity implements MessageListenerDelegate , 
             this.list = list;
             adapter.setData( list );
             adapter.notifyDataSetChanged();
+            d.dismiss();
+            conversation_listview.onRefreshComplete();
         }
         else if( id.equals( MessageTable.MSG_CLOSE_WIFI_FINISH) ) {
 
@@ -172,11 +187,49 @@ public class MainActivity extends Activity implements MessageListenerDelegate , 
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        WiFiManager manager = WiFiManager.getInstance();
-        final WiFiItem item = list.get(i);
+
+        final WiFiItem item = list.get(i-1);
         // TODO password dialog
         Log.d(TAG, "Join " + item.name);
         current_wifi = item;
-        manager.addNetWork( manager.CreateWifiConfiguration(item.name , ""));
+        if( item.isLock ) {
+
+            View layout = LayoutInflater.from(this).inflate(R.layout.ui_password_input_dialog, null);
+            final EditText edit_password = (EditText)layout.findViewById(R.id.dialog_password);
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle("请输入")
+                    .setIcon(android.R.drawable.ic_dialog_info)
+                    .setView(layout)
+                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            String password = edit_password.getText().toString();
+                            if( password.length() < 8 ) {
+                                UIHelper.makeToast("密码长度不足8位");
+                                return;
+                            }
+                            WiFiManager manager = WiFiManager.getInstance();
+                            manager.addNetWork( manager.CreateWifiConfiguration(item.name , password));
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                        }
+                    })
+                    .show();
+        }
+        else {
+            WiFiManager manager = WiFiManager.getInstance();
+            manager.addNetWork( manager.CreateWifiConfiguration(item.name , ""));
+        }
+
+    }
+
+    @Override
+    public void onRefresh() {
+        WiFiManager.getInstance().StartScan();
     }
 }

@@ -1,8 +1,8 @@
 package com.link.platform.ui.adapter;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,8 +15,10 @@ import com.link.platform.R;
 import com.link.platform.item.ContactItem;
 import com.link.platform.item.MessageItem;
 import com.link.platform.model.ContactModel;
-import com.link.platform.network.MsgType;
+import com.link.platform.network.util.MsgType;
 import com.link.platform.util.ImageLoader;
+import com.link.platform.util.SmilyManager;
+import com.link.platform.util.StringUtil;
 
 import java.util.List;
 
@@ -98,7 +100,7 @@ public class MessageAdapter extends BaseAdapter {
             viewHolder.online.setVisibility(View.VISIBLE);
             view.findViewById(R.id.message_area).setVisibility(View.GONE);
 
-            String content = contact.name + (item.msg_type == MsgType.MSG_ONLINE ? "加入" : "离开")
+            String content = item.content + (item.msg_type == MsgType.MSG_ONLINE ? "加入" : "离开")
                     + "了群聊";
             viewHolder.online.setText(content);
             return view;
@@ -162,8 +164,14 @@ public class MessageAdapter extends BaseAdapter {
             textLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
         }
         SpannableStringBuilder buf = new SpannableStringBuilder();
-        // TODO handle smily
-        viewHolder.message.setText( item.content );
+        String msgContent = item.content;
+        if (!TextUtils.isEmpty(msgContent)) {
+            //换行符替换
+            msgContent = replaceNewLineCode(msgContent);
+            // 表情
+            buf.append(SmilyManager.getInstance().getSmilySpan(msgContent));
+        }
+        viewHolder.message.setText( buf );
 
         viewHolder.picture.setVisibility(View.GONE);
     }
@@ -192,5 +200,14 @@ public class MessageAdapter extends BaseAdapter {
 
     private void handleFileMessage(MessageItem item, ViewHolder viewHolder) {
 
+    }
+
+    private String replaceNewLineCode(String replaceStr) {
+        if (StringUtil.isBlank(replaceStr)) {
+            return "";
+        }
+        replaceStr = replaceStr.replace("\r\n", "\n");
+        replaceStr = replaceStr.replace("\r", "\n");
+        return replaceStr;
     }
 }

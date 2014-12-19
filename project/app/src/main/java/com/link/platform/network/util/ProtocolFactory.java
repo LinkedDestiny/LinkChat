@@ -1,4 +1,4 @@
-package com.link.platform.util;
+package com.link.platform.network.util;
 
 import com.link.platform.item.ContactItem;
 import com.link.platform.network.socket.IOHelper;
@@ -18,11 +18,15 @@ import java.util.Map;
 public class ProtocolFactory {
 
     public static ByteBuffer parseProtocol(int type, String IP, byte[] content) {
+        return parseProtocol(type, IP, content, content.length);
+    }
+
+    public static ByteBuffer parseProtocol(int type, String IP, byte[] content, int size) {
         int buff_size = 8 + content.length;
         ByteBuffer buffer = ByteBuffer.allocate(buff_size);
         buffer.putInt(type);
         buffer.putInt(IOHelper.ipToInt( IP ) );
-        buffer.put(content);
+        buffer.put(content, 0 , size);
         return buffer;
     }
 

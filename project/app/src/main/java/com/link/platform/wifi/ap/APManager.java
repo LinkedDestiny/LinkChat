@@ -200,7 +200,7 @@ public class APManager {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            d.setTitle("Turning WiFi " + (mMode?"on":"off") + "...");
+            d.setTitle("正在 " + (mMode?"创建":"关闭") + "房间...");
             d.setMessage("...please wait a moment.");
             d.show();
         }
@@ -214,7 +214,7 @@ public class APManager {
 
             d.dismiss();
 
-            UIHelper.makeToast("Turning WiFi " + (mMode ? "on" : "off") + (result ? " successful." : "failed."));
+            UIHelper.makeToast((mMode ?"创建":"关闭") + "房间" + (result ? " 成功." : "失败."));
             MessageWithObject msg = new MessageWithObject();
             msg.setMsgId( mMode ? MessageTable.MSG_OPEN_AP_FINISH : MessageTable.MSG_CLOSE_AP_FINISH );
             msg.setObject( mMode ? result : true);

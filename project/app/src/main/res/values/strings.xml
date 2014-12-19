@@ -13,5 +13,9 @@
     <string name="create_room_help">创建一个聊天室，如果密码为空，则任何人都可进入房间</string>
     <string name="create_room_hint">创建聊天室会关闭WiFi功能，请注意</string>
     <string name="title_activity_conversation">ConversationActivity</string>
-
+    <string name="view_pull_header_hint_normal">下拉刷新</string>
+    <string name="view_pull_header_hint_ready">松开即可刷新</string>
+    <string name="view_pull_header_hint_loading">正在刷新…</string>
+    <string name="load_more_list_recent_update">最近更新:</string>
+    <string name="load_more_list_no_update">最近更新:无更新</string>
 </resources>

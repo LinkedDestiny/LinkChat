@@ -5,7 +5,7 @@
     android:orientation="vertical"
     >
     <include layout="@layout/ui_search_bar"></include>
-    <ListView
+    <com.link.platform.ui.component.LoadMoreListView
         android:layout_width="match_parent"
         android:layout_height="0dip"
         android:layout_weight="1"
@@ -14,5 +14,5 @@
         android:dividerHeight="1dp"
         android:divider="#ccc"
         >
-        </ListView>
+        </com.link.platform.ui.component.LoadMoreListView>
 </LinearLayout>

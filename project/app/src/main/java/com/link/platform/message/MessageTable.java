@@ -25,4 +25,6 @@ public class MessageTable {
     public final static String MSG_VOICE                            = "MSG_VOICE";
     public final static String MSG_FILE                             = "MSG_FILE";
 
+    public final static String MSG_SERVER_CLOSE                     = "MSG_SERVER_CLOSE";
+
 }

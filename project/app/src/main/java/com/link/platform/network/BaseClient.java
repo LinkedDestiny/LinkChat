@@ -8,19 +8,20 @@ import com.link.platform.activity.setting.LocalSetting;
 import com.link.platform.item.ContactItem;
 import com.link.platform.item.MessageItem;
 
-import com.link.platform.message.BaseMessage;
 import com.link.platform.message.MessageCenter;
-import com.link.platform.message.MessageListenerDelegate;
 import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
 import com.link.platform.model.ContactModel;
 import com.link.platform.network.socket.IClient;
 import com.link.platform.network.socket.IOHelper;
 import com.link.platform.network.socket.MainClient;
+import com.link.platform.network.util.MsgType;
+import com.link.platform.network.util.ProtocolFactory;
 import com.link.platform.util.*;
 import com.link.platform.util.Error;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +35,11 @@ public class BaseClient implements IClient {
 
     public final static String TAG = "BaseClient";
 
-    public static List<BaseClient> INSTANCES = new ArrayList<BaseClient>();
+    private static Map<String, BaseClient> INSTANCES = new HashMap<String, BaseClient>();
+    public static BaseClient getInstance(String key) {
+        return INSTANCES.get(key);
+    }
+
 
     private MainClient client;
     private String IP;
@@ -44,7 +49,10 @@ public class BaseClient implements IClient {
 
     public BaseClient(String host, int port) {
         client = new MainClient(host, port, this);
-        INSTANCES.add( this );
+        if( INSTANCES.containsKey(TAG) ) {
+            INSTANCES.remove(TAG);
+        }
+        INSTANCES.put( TAG , this );
         handlerthread = new HandlerThread("SendThread");
     }
 
@@ -57,6 +65,7 @@ public class BaseClient implements IClient {
     public void stop() {
         client.stop();
         handlerthread.quit();
+        INSTANCES.remove(TAG);
     }
 
     public String getIP() {
@@ -68,14 +77,19 @@ public class BaseClient implements IClient {
         handler.post(new Runnable() {
             @Override
             public void run() {
-                byte[] bytes = msgItem.content.getBytes();
-                ByteBuffer buffer = ProtocolFactory.parseProtocol(msgItem.msg_type, IP, bytes);
+                byte[] bytes;
                 try {
+                    bytes = msgItem.content.getBytes( msgItem.singleByteDecode ? "ISO-8859-1" : "UTF-9" );
+                    ByteBuffer buffer = ProtocolFactory.parseProtocol(msgItem.msg_type, IP, bytes);
                     int errno = client.send(buffer.array());
                     if( errno != Error.IO_SUCCESS ) {
                         Log.e(TAG, "write errno : " + errno );
                     }
-                } catch (IOException e) {
+                }
+                catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -111,9 +125,9 @@ public class BaseClient implements IClient {
 
         byte[] buff = new byte[message.remaining()];
         message.get(buff);
-        String content = new String(buff);
 
-        handleMessage(msg_type, from_ip, content);
+
+        handleMessage(msg_type, from_ip, buff);
     }
 
     @Override
@@ -124,11 +138,11 @@ public class BaseClient implements IClient {
         }
     }
 
-    private void handleMessage(int msg_type, String from_ip, String content) {
-        Log.d(TAG, "recv from " + from_ip + " : " + content );
+    private void handleMessage(int msg_type, String from_ip, byte[] buff) {
+        Log.d(TAG, "recv from " + from_ip );
         switch ( msg_type ) {
             case MsgType.MSG_ONLINE_LIST: {
-
+                String content = new String(buff);
                 Map<String, ContactItem> online_list = ProtocolFactory.getOnlineList(content);
                 ContactModel.getInstance().addContacts(online_list, true);
 
@@ -139,6 +153,7 @@ public class BaseClient implements IClient {
                 break;
             }
             case MsgType.MSG_TEXT: {
+                String content = new String(buff);
                 MessageWithObject msg = new MessageWithObject();
                 msg.setMsgId(MessageTable.MSG_TEXT);
                 msg.setObject( MessageItem.textMessage(from_ip, false, content) );
@@ -158,6 +173,7 @@ public class BaseClient implements IClient {
                 break;
             }
             case MsgType.MSG_ONLINE: {
+                String content = new String(buff);
                 ContactModel.getInstance().addContact(new ContactItem(from_ip, content, ""));
 
                 MessageWithObject msg = new MessageWithObject();
@@ -167,11 +183,17 @@ public class BaseClient implements IClient {
                 break;
             }
             case MsgType.MSG_OFFLINE: {
-                ContactModel.getInstance().removeContact(content);
-
+                String content = new String(buff);
+                ContactItem contact =  ContactModel.getInstance().getContact(content);
                 MessageWithObject msg = new MessageWithObject();
-                msg.setMsgId(MessageTable.MSG_OFFLINE);
-                msg.setObject( MessageItem.offlineMessage(from_ip, false, content) );
+                if(contact.IP.equals("127.0.0.1")) {
+                    msg.setMsgId(MessageTable.MSG_SERVER_CLOSE);
+                } else {
+                    msg.setMsgId(MessageTable.MSG_OFFLINE);
+                }
+
+                msg.setObject( MessageItem.offlineMessage(contact.IP, false, contact.name) );
+                ContactModel.getInstance().removeContact(content);
                 MessageCenter.getInstance().sendMessage(msg);
                 break;
             }

@@ -127,7 +127,7 @@ public class WiFiManager {
     public void addNetWork( WifiConfiguration wcg ){
         int wcgID = wifi.addNetwork(wcg);
         Log.d(TAG,  "set Wifi connect " + wcgID + ": " +  wifi.enableNetwork(wcgID, true) );
-        new AddAsyncTask(context, wcg.SSID).execute();
+        new AddAsyncTask(context, wcg.SSID.substring(7)).execute();
     }
 
     public WifiConfiguration CreateWifiConfiguration(String SSID, String Password) {
@@ -157,12 +157,14 @@ public class WiFiManager {
         } else {
             config.hiddenSSID = true;
             config.preSharedKey = "\""+Password+"\"";
+            config.allowedAuthAlgorithms.set(WifiConfiguration.AuthAlgorithm.OPEN);
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
-            config.allowedProtocols.set(WifiConfiguration.Protocol.RSN);
+            config.allowedProtocols.set(WifiConfiguration.Protocol.WPA);
+            config.status = WifiConfiguration.Status.ENABLED;
         }
 
         return config;
@@ -231,7 +233,7 @@ public class WiFiManager {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            d.setTitle("Connect to " + room + "...");
+            d.setTitle("正在进入 " + room + "...");
             d.setMessage("...please wait a moment.");
             d.show();
         }
@@ -241,7 +243,7 @@ public class WiFiManager {
             boolean result = Boolean.valueOf(o.toString());
             d.dismiss();
 
-            UIHelper.makeToast("Connect to " + room + ( result ? " successful." : "failed."));
+            UIHelper.makeToast("进入 " + room + ( result ? " 成功." : "失败."));
 
             MessageWithObject msg = new MessageWithObject();
             msg.setMsgId( MessageTable.MSG_CONNECT_WIFI_FINISH );
@@ -267,7 +269,7 @@ public class WiFiManager {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            d.setTitle("Turning WiFi " + (mMode?"on":"off") + "...");
+            d.setTitle((mMode?"开启":"关闭") + "WiFi...");
             d.setMessage("...please wait a moment.");
             d.show();
         }
@@ -277,7 +279,7 @@ public class WiFiManager {
             boolean result = Boolean.valueOf(o.toString());
             d.dismiss();
 
-            UIHelper.makeToast("Turning WiFi " + (mMode?"on":"off") + ( result ? " successful." : "failed."));
+            UIHelper.makeToast((mMode?"开启":"关闭") + "WiFi" + ( result ? " 成功." : "失败."));
 
             MessageWithObject msg = new MessageWithObject();
             msg.setMsgId( mMode ? MessageTable.MSG_OPEN_WIFI_FINISH : MessageTable.MSG_CLOSE_WIFI_FINISH );

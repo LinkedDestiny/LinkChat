@@ -7,9 +7,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,7 +27,10 @@ import com.link.platform.message.MessageWithObject;
 import com.link.platform.network.BaseClient;
 import com.link.platform.network.ServerService;
 import com.link.platform.network.socket.IOHelper;
+import com.link.platform.ui.adapter.AddMoreAdapter;
+import com.link.platform.ui.adapter.EmojAdapter;
 import com.link.platform.ui.adapter.MessageAdapter;
+import com.link.platform.util.SmilyManager;
 import com.link.platform.util.UIHelper;
 import com.link.platform.util.Utils;
 import com.link.platform.wifi.ap.APManager;
@@ -34,7 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConversationActivity extends Activity implements MessageListenerDelegate , View.OnClickListener
-                                                , TextWatcher {
+                                                , TextWatcher , AdapterView.OnItemClickListener {
 
     public final static String TAG = "ConversationActivity";
     public final static String PARAM_ROOM_NAME = "room_name";
@@ -43,6 +49,12 @@ public class ConversationActivity extends Activity implements MessageListenerDel
     private ListView message_listview;
     private MessageAdapter adapter;
     private List<MessageItem> list = new ArrayList<MessageItem>();
+
+    private GridView emoj_view;
+    private EmojAdapter emojAdapter;
+
+    private GridView add_view;
+    private AddMoreAdapter addMoreAdapter;
 
     private ImageView back, settings;
     private TextView title;
@@ -60,6 +72,10 @@ public class ConversationActivity extends Activity implements MessageListenerDel
     private boolean isKeyboardShow;
     private InputMethodManager imm;
     private boolean isSendText = false;
+
+    private SmilyManager smilyManager;
+    private boolean isEmojShow = false;
+    private boolean isAddMoreShow = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +95,12 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         client = new BaseClient(host_ip, Utils.CHAT_PORT);
         client.start();
 
+        smilyManager = SmilyManager.getInstance();
+
         initView();
+        initMenu();
+
+        showKeyboard();
     }
 
     @Override
@@ -127,11 +148,27 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         title.setText(room_name);
         message_input = (EditText)findViewById(R.id.message_input);
         message_input.addTextChangedListener(this);
+        message_input.setOnClickListener(this);
 
         d = new ProgressDialog(this);
         d.setTitle("正在连接房间...");
         d.show();
     }
+
+    private void initMenu() {
+
+        emoj_view = (GridView)findViewById(R.id.grid_emoj);
+        emojAdapter = new EmojAdapter(this, 0);
+        emoj_view.setOnItemClickListener(this);
+        emoj_view.setAdapter(emojAdapter);
+
+        add_view = (GridView)findViewById(R.id.grid_add_more);
+        addMoreAdapter = new AddMoreAdapter(this);
+        add_view.setOnItemClickListener(this);
+        add_view.setAdapter(addMoreAdapter);
+    }
+
+
 
     @Override
     public void onListenerExit() {
@@ -183,7 +220,20 @@ public class ConversationActivity extends Activity implements MessageListenerDel
             list.add(item);
             adapter.notifyDataSetChanged();
         }
+        else if( id.equals(MessageTable.MSG_SERVER_CLOSE ) ) {
+            UIHelper.makeToast("聊天室已关闭，正在退出...");
+            onBack();
+        }
+    }
 
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            showKeyboard();
+            onBack();
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     @Override
@@ -191,16 +241,7 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         int id = view.getId();
         switch (id) {
             case R.id.title_back: {
-                // TODO send offline
-                client.stop();
-                if( getIntent().getBooleanExtra(PARAM_IS_HOST, false) ) {
-                    ServerService.isInitServer = false;
-                    Intent server = new Intent(this, ServerService.class);
-                    stopService(server);
-                    APManager.getInstance().toggleWiFiAP(this, false);
-                } else {
-                    this.finish();
-                }
+                onBack();
                 return;
             }
             case R.id.settings: {
@@ -221,6 +262,38 @@ public class ConversationActivity extends Activity implements MessageListenerDel
                 }
                 break;
             }
+            case R.id.emoj:
+            {
+                clickEmoj();
+                break;
+            }
+            case R.id.add_more:
+            {
+                clickAddMore();
+                break;
+            }
+            case R.id.message_input:
+            {
+                showKeyboard();
+                reset();
+                break;
+            }
+        }
+    }
+
+    private void onBack() {
+        if( isKeyboardShow ) {
+            hideKeyBoard();
+        }
+        // TODO send offline
+        client.stop();
+        if( getIntent().getBooleanExtra(PARAM_IS_HOST, false) ) {
+            ServerService.isInitServer = false;
+            Intent server = new Intent(this, ServerService.class);
+            stopService(server);
+            APManager.getInstance().toggleWiFiAP(this, false);
+        } else {
+            this.finish();
         }
     }
 
@@ -231,7 +304,7 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         isKeyboardShow = false;
         View view = getCurrentFocus();
         if (view != null) {
-            imm.hideSoftInputFromWindow(message_input.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 
@@ -268,6 +341,78 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         } else {
             voice_send.setVisibility(View.VISIBLE);
             send.setVisibility(View.GONE);
+        }
+    }
+
+    private void clickEmoj() {
+        if( isEmojShow ) {
+            showKeyboard();
+            findViewById(R.id.emoj_menu).setVisibility(View.GONE);
+
+            emoj.setImageResource(R.drawable.emoj);
+            isEmojShow = false;
+        }
+        else {
+            reset();
+            hideKeyBoard();
+            findViewById(R.id.emoj_menu).setVisibility(View.VISIBLE);
+
+            emoj.setImageResource(R.drawable.keyboard);
+            isEmojShow = true;
+        }
+    }
+
+    private void clickAddMore() {
+        if( isAddMoreShow ) {
+            showKeyboard();
+            add_view.setVisibility(View.GONE);
+
+            add_more.setImageResource(R.drawable.add_more);
+            isAddMoreShow = false;
+        }
+        else {
+            reset();
+            hideKeyBoard();
+            add_view.setVisibility(View.VISIBLE);
+
+            add_more.setImageResource(R.drawable.keyboard);
+            isAddMoreShow = true;
+        }
+    }
+
+    private void reset() {
+        if( !isSendText ) {
+            voice_send.setImageResource(R.drawable.voice_nor);
+        }
+        emoj.setImageResource(R.drawable.emoj);
+        add_more.setImageResource(R.drawable.add_more);
+
+        add_view.setVisibility(View.GONE);
+        findViewById(R.id.emoj_menu).setVisibility(View.GONE);
+
+        isEmojShow = false;
+        isAddMoreShow = false;
+    }
+
+    private void appendTextToInputText(String text, EditText mInputText) {
+
+        if (mInputText != null && smilyManager != null && text != null) {
+            int before = mInputText.getSelectionStart();
+            int end = mInputText.getSelectionEnd();
+            CharSequence span = smilyManager.getSmilySpan(text);
+            mInputText.getText().replace(before, end, span);
+
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        if( adapterView.getId() == R.id.grid_emoj ) {
+           int index = Integer.valueOf(emojAdapter.getItem(i).toString());
+           appendTextToInputText( SmilyManager.getInstance().getShortCut( index - R.drawable.eaa ) , message_input );
+        }
+        if( adapterView.getId() == R.id.grid_add_more ) {
+            UIHelper.makeToast("功能未完成...");
         }
     }
 }

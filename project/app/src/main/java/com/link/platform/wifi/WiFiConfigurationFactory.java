@@ -61,7 +61,7 @@ public class WiFiConfigurationFactory {
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.TKIP);
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.TKIP);
             config.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.WPA_PSK);
-            config.allowedProtocols.set( WifiConfiguration.Protocol.RSN );
+            config.allowedProtocols.set( WifiConfiguration.Protocol.WPA );
             config.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.CCMP);
             config.allowedPairwiseCiphers.set(WifiConfiguration.PairwiseCipher.CCMP);
         }

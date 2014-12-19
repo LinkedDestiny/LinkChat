@@ -1,4 +1,4 @@
-package com.link.platform.network;
+package com.link.platform.network.util;
 
 /**
  * Created by danyang.ldy on 2014/12/9.

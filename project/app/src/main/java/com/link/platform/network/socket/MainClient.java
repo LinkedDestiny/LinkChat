@@ -159,7 +159,14 @@ public class MainClient implements Runnable {
         if( key.isConnectable() ) {
             SocketChannel channel = (SocketChannel) key.channel();
             if (channel.finishConnect()) {
-                iClient.onConnect(IOHelper.ipIntToString(WiFiManager.getInstance().getIP()));
+                int num_ip = WiFiManager.getInstance().getIP();
+                if( num_ip == 0 ) {
+                    iClient.onConnect("127.0.0.1");
+                }
+                else {
+                    iClient.onConnect(IOHelper.ipIntToString(num_ip));
+                }
+
 
                 mainchannel.configureBlocking(false);
                 mainchannel.register(selector, SelectionKey.OP_READ );

@@ -14,6 +14,7 @@
         android:background="#ebecee"
         >
         <LinearLayout
+            android:id="@+id/message_bar"
             android:layout_width="match_parent"
             android:layout_height="52dip"
             android:gravity="center_vertical"
@@ -63,7 +64,39 @@
                 android:gravity="center"
                 />
             </LinearLayout>
+        <com.link.platform.ui.component.ViewScroller
+            android:id="@+id/emoj_menu"
+            android:layout_below="@id/message_bar"
+            android:layout_width="match_parent"
+            android:layout_height="152.0dip"
+            android:visibility="gone"
+            android:layout_marginTop="12dip"
+            >
+            <GridView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:numColumns="7"
+                android:verticalSpacing="12dp"
+                android:horizontalSpacing="10dp"
+                android:id="@+id/grid_emoj"
+                android:gravity="center"
+                >
 
+            </GridView>
+            </com.link.platform.ui.component.ViewScroller>
+        <GridView
+            android:layout_width="match_parent"
+            android:layout_height="152dip"
+            android:id="@+id/grid_add_more"
+            android:layout_below="@id/message_bar"
+            android:layout_marginRight="12dip"
+            android:layout_marginLeft="12dip"
+            android:numColumns="3"
+            android:scrollbars="none"
+            android:visibility="gone"
+            android:verticalSpacing="12dp"
+            >
+        </GridView>
         </RelativeLayout>
     <ListView
         android:id="@+id/message_list"
