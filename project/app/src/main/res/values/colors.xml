@@ -20,6 +20,7 @@
     <color name="orange">#ff6600</color>
     <color name="hint">#ccc</color>
 
+    <color name="panel_font_color">#737373</color>
 
     <color name="tip_gray">#999</color>
     <color name="content_black">#333</color>

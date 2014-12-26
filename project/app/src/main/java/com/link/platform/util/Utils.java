@@ -1,5 +1,9 @@
 package com.link.platform.util;
 
+import android.os.Environment;
+
+import java.io.File;
+
 /**
  * Created by danyang.ldy on 2014/12/8.
  */
@@ -28,8 +32,9 @@ public class Utils {
     public final static long SELECT_TIMEOUT = 60 * 1000;
 
     public static String PATH;
+    public static String SD_PATH;
 
-    public final static String STORAGE_PATH = "LinkChat";
+    public final static String STORAGE_PATH = "/storage/";
     public final static String IMG_CACHE = "/IMG/";
     public final static String VOICE_CACHE = "/VOICE/";
     public final static String FILE_CACHE = "/FILE/";
@@ -37,4 +42,22 @@ public class Utils {
     public final static String LOCAL_SETTING = "local_settings";
 
     public final static int CHAT_PORT = 9501;
+
+    public static void init() {
+        PATH = "/data" + Environment.getDataDirectory().getAbsolutePath() + "/com.link.platform";
+        SD_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/LinkChat";
+
+        File dir = new File( SD_PATH + IMG_CACHE );
+        if( !dir.exists() ) {
+            dir.mkdirs();
+        }
+        dir = new File( SD_PATH + VOICE_CACHE );
+        if( !dir.exists() ) {
+            dir.mkdirs();
+        }
+        dir = new File( SD_PATH + FILE_CACHE );
+        if( !dir.exists() ) {
+            dir.mkdirs();
+        }
+    }
 }

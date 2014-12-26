@@ -20,7 +20,8 @@ public class AudioData {
     }
 
     public void setData(byte[] realData) {
-        this.realData = realData;
+        this.realData = new byte[realData.length];
+        System.arraycopy(realData,0,this.realData,0,realData.length);
     }
 
 }

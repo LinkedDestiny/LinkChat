@@ -122,6 +122,7 @@ public class MainServer implements Runnable {
             return Error.IO_NO_CHANNEL;
 
         ByteBuffer temp = ByteBuffer.allocate( 4 + message.length );
+        Log.d(TAG, "SEND msg " + new String(message) );
         temp.putInt( message.length );
         temp.put( message );
         temp.flip();
@@ -224,6 +225,17 @@ public class MainServer implements Runnable {
                 if( !buffer.hasRemaining() ) {
                     buffer.clear();
                 } else {
+                    while( buffer.remaining() > 4 ) {
+                        int len = buffer.getInt();
+                        if( buffer.remaining() < len ) {
+                            buffer.position( buffer.position() - 4 );
+                            break;
+                        } else {
+                            buff = new byte[len];
+                            buffer.get( buff );
+                            controller.onReceive(channel.socket(), ByteBuffer.wrap(buff) );
+                        }
+                    }
                     buffer.compact();
                 }
                 channel.configureBlocking(false);

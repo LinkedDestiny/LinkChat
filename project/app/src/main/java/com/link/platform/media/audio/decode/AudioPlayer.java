@@ -10,6 +10,7 @@ import com.link.platform.media.audio.AudioConfig;
 import com.link.platform.media.audio.AudioData;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,26 +30,16 @@ public class AudioPlayer implements Runnable {
     private boolean isPlaying = false;
 
     private AudioTrack audioTrack;
+    private int buffsize;
 
     //
     private File file;
-    private FileOutputStream fos;
+    private FileInputStream fin;
 
     private AudioPlayer() {
         dataList = Collections.synchronizedList(new LinkedList<AudioData>());
 
-        file = new File("/sdcard/audio/decode.amr");
-        try {
-            if (!file.exists())
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            fos = new FileOutputStream(file);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+
     }
 
     public static AudioPlayer getInstance() {
@@ -56,6 +47,21 @@ public class AudioPlayer implements Runnable {
             player = new AudioPlayer();
         }
         return player;
+    }
+
+    public boolean init(String path) {
+        file = new File(path);
+        try {
+            if (!file.exists()) {
+                return false;
+            }
+
+            fin = new FileInputStream(file);
+            return true;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public void addData(byte[] rawData, int size) {
@@ -72,36 +78,30 @@ public class AudioPlayer implements Runnable {
      * init Player parameters
      */
     private boolean initAudioTrack() {
-        int bufferSize = AudioRecord.getMinBufferSize(AudioConfig.SAMPLERATE,
-                AudioFormat.CHANNEL_CONFIGURATION_MONO,
+        buffsize = AudioRecord.getMinBufferSize(AudioConfig.SAMPLERATE,
+                AudioFormat.CHANNEL_OUT_DEFAULT,
                 AudioConfig.AUDIO_FORMAT);
-        if (bufferSize < 0) {
+        if (buffsize < 0) {
             Log.e(TAG, "initialize error!");
             return false;
         }
-        Log.i(TAG, "Player初始化的 buffersize是 " + bufferSize);
+        Log.i(TAG, "Player初始化的 buffersize是 " + buffsize);
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-                AudioConfig.SAMPLERATE, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-                AudioConfig.AUDIO_FORMAT, bufferSize, AudioTrack.MODE_STREAM);
+                AudioConfig.SAMPLERATE, AudioFormat.CHANNEL_OUT_DEFAULT,
+                AudioConfig.AUDIO_FORMAT, buffsize, AudioTrack.MODE_STREAM);
         // set volume:设置播放音量
-        audioTrack.setStereoVolume(1.0f, 1.0f);
+        audioTrack.setStereoVolume(0.7f, 0.7f);
         audioTrack.play();
         return true;
     }
 
     private void playFromList() throws IOException {
-        while (isPlaying) {
-            while (dataList.size() > 0) {
-                playData = dataList.remove(0);
-                Log.e(TAG, "播放一次数据 " + dataList.size());
-                audioTrack.write(playData.getData(), 0, playData.getSize());
-                // fos.write(playData.getRealData(), 0, playData.getSize());
-                // fos.flush();
-            }
-            try {
-                Thread.sleep(20);
-            } catch (InterruptedException e) {
-            }
+        byte[] buff = new byte[buffsize];
+        int n;
+        while ((n = fin.read(buff)) > 0) {
+            Log.e(TAG, "播放一次数据 " + n);
+            int writen = audioTrack.write(buff, 0, n);
+            Log.e(TAG, "播放了 " + writen);
         }
     }
 
@@ -132,6 +132,7 @@ public class AudioPlayer implements Runnable {
             }
         }
         Log.d(TAG, "end playing");
+        stopPlaying();
     }
 
     public void stopPlaying() {

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="12dip"
+    android:background="@android:color/transparent"
+    >
+    <TextView
+        android:id="@+id/online_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14dip"
+        android:textColor="@color/content_gray"
+        android:visibility="gone"
+        android:gravity="center"
+        />
+
+    <RelativeLayout
+        android:id="@+id/message_area"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+    <ImageView
+        android:id="@+id/left_head"
+        android:layout_width="40dip"
+        android:layout_height="40dip"
+        android:src="@drawable/default_avatar"
+        android:layout_marginRight="5dip"
+        />
+    <ImageView
+        android:id="@+id/right_head"
+        android:layout_width="40dip"
+        android:layout_height="40dip"
+        android:src="@drawable/default_avatar"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="5dip"
+        />
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/left_head"
+        android:layout_toLeftOf="@+id/right_head"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:id="@+id/message_sender_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:maxEms="12"
+            android:layout_marginBottom="3dp"
+            android:ellipsize="end"
+            android:textSize="12dp"
+            android:textColor="@color/content_gray"
+            android:text="tribeName"
+            android:visibility="gone"
+            />
+
+        <RelativeLayout
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:minHeight="40dip"
+            android:layout_marginTop="4dip"
+            >
+
+            <TextView
+                android:id="@+id/textView_message"
+                android:textSize="16dp"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:gravity="left|center_vertical"
+                android:text="message"
+                android:linksClickable="false"
+                android:textColorLink="@color/content_black"
+                android:autoLink="web"
+                android:padding="12dip"
+
+                />
+
+            <ImageView
+                android:contentDescription=""
+                android:layout_width="160dip"
+                android:layout_height="120dip"
+                android:layout_toRightOf="@id/textView_message"
+                android:src="@drawable/chatting_detail_image_cover_left"
+                android:scaleType="fitXY"
+                android:id="@+id/message_img"/>
+        </RelativeLayout>
+    </LinearLayout>
+    </RelativeLayout>
+</RelativeLayout>
+<!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/layout/item_chat.xml -->

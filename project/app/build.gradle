@@ -4,6 +4,12 @@ android {
     compileSdkVersion 19
     buildToolsVersion "19.1.0"
 
+    sourceSets {
+        main {
+            jni.srcDirs = []
+            jniLibs.srcDir 'src/main/jniLibs'
+        }
+    }
     defaultConfig {
         applicationId "com.link.platform"
         minSdkVersion 14
@@ -13,7 +19,7 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }

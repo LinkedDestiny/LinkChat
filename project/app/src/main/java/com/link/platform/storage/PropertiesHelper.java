@@ -18,8 +18,8 @@ public class PropertiesHelper {
     private static String PATH = null;
 
     private static void INIT_PROP() {
-        Utils.PATH = "/data" + Environment.getDataDirectory().getAbsolutePath() + "/com.link.platform";
-        PATH = Utils.PATH + "/files/";
+
+        PATH = Utils.PATH + Utils.STORAGE_PATH;
         File file = new File(PATH);
         if( !file.exists() ) {
             file.mkdirs();

@@ -13,7 +13,9 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Created by danyang.ldy on 2014/12/8.
@@ -33,9 +35,11 @@ public class MainClient implements Runnable {
     private Selector selector;
 
     private ByteBuffer buffer;
+    private List<ByteBuffer> dataList = new ArrayList<ByteBuffer>();
     private IClient iClient;
 
     private Thread thread;
+    private Thread write_thread;
 
     public MainClient( String host, int port, IClient iClient) {
         this.host = host;
@@ -51,7 +55,32 @@ public class MainClient implements Runnable {
             thread = new Thread(this);
             loop = true;
             thread.start();
-
+            write_thread = new Thread( new Runnable() {
+                @Override
+                public void run() {
+                    while( loop ) {
+                        while( dataList.size() > 0 ) {
+                            long length = 0;
+                            try {
+                                if( dataList.size() > 0 ) {
+                                    ByteBuffer buff = dataList.remove(0);
+                                    if( buff == null ) {
+                                        continue;
+                                    }
+                                    int size = buff.getInt(0);
+                                    length = mainchannel.write(buff);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            if( length < 0 ) {
+                                iClient.onError((int)length);
+                            }
+                        }
+                    }
+                }
+            });
+            write_thread.start();
         } else {
             pause = false;
         }
@@ -85,16 +114,12 @@ public class MainClient implements Runnable {
     public int send(byte[] message) throws IOException {
 
         ByteBuffer temp = ByteBuffer.allocate( 4 + message.length );
+        Log.d(TAG, "SEND msg length = " + message.length );
         temp.putInt( message.length );
         temp.put( message );
         temp.flip();
-        long length = mainchannel.write(temp);
-        if( length > 0 ) {
-            return Error.IO_SUCCESS;
-        } else {
-            return (int)length;
-        }
-
+        dataList.add(temp);
+        return Error.IO_SUCCESS;
     }
 
     @Override
@@ -179,7 +204,6 @@ public class MainClient implements Runnable {
 
             SocketChannel channel = (SocketChannel) key.channel();
 
-            // TODO 包完整性校验
             int errno = IOHelper.read(channel, buffer);
             if( errno == Error.IO_CLOSE ) {
                 iClient.onError(errno);
@@ -197,6 +221,17 @@ public class MainClient implements Runnable {
                 if( !buffer.hasRemaining() ) {
                     buffer.clear();
                 } else {
+                    while( buffer.remaining() > 4 ) {
+                        int len = buffer.getInt();
+                        if( buffer.remaining() < len ) {
+                            buffer.position( buffer.position() - 4 );
+                            break;
+                        } else {
+                            buff = new byte[len];
+                            buffer.get( buff );
+                            iClient.onReceive(ByteBuffer.wrap(buff));
+                        }
+                    }
                     buffer.compact();
                 }
             } else {

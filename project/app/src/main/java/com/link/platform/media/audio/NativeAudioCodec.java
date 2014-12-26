@@ -5,10 +5,6 @@ package com.link.platform.media.audio;
  */
 public class NativeAudioCodec {
 
-    static {
-        System.loadLibrary("NativeAudioCodec");
-    }
-
     // initialize decoder and encoder
     public static native int audio_codec_init(int mode);
 

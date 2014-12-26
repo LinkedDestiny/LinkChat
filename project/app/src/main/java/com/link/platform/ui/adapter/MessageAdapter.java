@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.link.platform.R;
 import com.link.platform.item.ContactItem;
 import com.link.platform.item.MessageItem;
+import com.link.platform.media.audio.decode.AudioPlayer;
 import com.link.platform.model.ContactModel;
 import com.link.platform.network.util.MsgType;
 import com.link.platform.util.ImageLoader;
@@ -151,7 +152,6 @@ public class MessageAdapter extends BaseAdapter {
 
     private void handleTextMessage(MessageItem item, ViewHolder viewHolder) {
         viewHolder.message.setVisibility(View.VISIBLE);
-
         RelativeLayout.LayoutParams textLayout = (RelativeLayout.LayoutParams) viewHolder.message.getLayoutParams();
         if( item.isOwn ) {
             viewHolder.message.setBackgroundResource(R.drawable.chatting_right_content_bg);
@@ -195,7 +195,30 @@ public class MessageAdapter extends BaseAdapter {
     }
 
     private void handleVoiceMessage(MessageItem item, ViewHolder viewHolder) {
+        final MessageItem voice = item;
+        viewHolder.message.setVisibility(View.VISIBLE);
+        viewHolder.message.setText("语音消息");
+        RelativeLayout.LayoutParams textLayout = (RelativeLayout.LayoutParams) viewHolder.message.getLayoutParams();
+        if( item.isOwn ) {
+            viewHolder.message.setBackgroundResource(R.drawable.chatting_right_content_bg);
+            textLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+            textLayout.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
 
+        } else {
+            viewHolder.message.setBackgroundResource(R.drawable.chatting_left_content_bg);
+            textLayout.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            textLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+        }
+        viewHolder.message.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AudioPlayer player = AudioPlayer.getInstance();
+                if( player.init( voice.content ) ) {
+                    player.startPlaying();
+                }
+            }
+        });
+        viewHolder.picture.setVisibility(View.GONE);
     }
 
     private void handleFileMessage(MessageItem item, ViewHolder viewHolder) {

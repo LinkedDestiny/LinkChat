@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    >
+    <ImageView
+        android:layout_width="48dip"
+        android:layout_height="48dip"
+        android:id="@+id/item_add_pic"
+        android:src="@drawable/send_camera"
+        />
+    <TextView
+        android:layout_marginTop="5dip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/item_add_name"
+        android:textSize="14dip"
+        android:textColor="@color/black"
+        android:text="拍照"
+        />
+</LinearLayout>
+<!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/layout/item_add_more.xml -->

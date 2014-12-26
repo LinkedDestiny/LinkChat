@@ -14,21 +14,24 @@ import java.nio.channels.SocketChannel;
 public class IOHelper {
 
     public static int read( SocketChannel channel , ByteBuffer buffer )
-            throws IOException {
+             {
 
         if( channel == null )
             return Error.IO_NO_CHANNEL;
 
-        long count = channel.read(buffer);
-        if ( count > 0 ) {
-            int position = buffer.position();
-            buffer.flip();
-            int readn = buffer.limit() - buffer.position();
-            if( readn > 4 ) {
+         long count = 0;
+         try {
+             count = channel.read(buffer);
+         } catch (IOException e) {
+             e.printStackTrace();
+             return Error.IO_CLOSE;
+         }
+         if ( count > 0 ) {
+            if( buffer.remaining() > 4 ) {
                 int len = buffer.getInt();
-                if( ( buffer.limit() - buffer.position() ) < len ) {
-                    buffer.clear();
-                    buffer.position(position);
+                if( buffer.remaining() < len ) {
+                    buffer.position( buffer.position() - 4 );
+                    buffer.compact();
                     return Error.IO_PROTOCOL_NO_COMPLETE;
                 }
                 return len;

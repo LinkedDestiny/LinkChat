@@ -97,6 +97,49 @@
             android:verticalSpacing="12dp"
             >
         </GridView>
+        <RelativeLayout
+            android:id="@+id/voice_panel"
+            android:layout_width="match_parent"
+            android:layout_height="152.0dip"
+            android:layout_below="@id/message_bar"
+            android:visibility="gone"
+            >
+
+
+            <ImageView
+                android:id="@+id/audio_record_button"
+                android:layout_width="96dip"
+                android:layout_height="96dip"
+                android:layout_centerInParent="true"
+                android:src="@drawable/audio_record_bg"
+                />
+            <ImageView
+                android:layout_width="56dip"
+                android:layout_height="56dip"
+                android:layout_centerInParent="true"
+                android:src="@drawable/audio_panel_microphone"
+                />
+            <TextView
+                android:id="@+id/audio_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_above="@id/audio_record_button"
+                android:text="@string/audio_hint"
+                android:textColor="@color/panel_font_color"
+                android:layout_marginBottom="5dip"
+                />
+            <ImageView
+                android:id="@+id/audio_cancel"
+                android:layout_width="24dip"
+                android:layout_height="24dip"
+                android:src="@drawable/audio_delete"
+                android:layout_centerInParent="true"
+                android:layout_toRightOf="@id/audio_record_button"
+                android:layout_marginLeft="36dip"
+                android:visibility="gone"
+                />
+            </RelativeLayout>
         </RelativeLayout>
     <ListView
         android:id="@+id/message_list"

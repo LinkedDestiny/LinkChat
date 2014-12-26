@@ -17,6 +17,8 @@ import java.util.Map;
  */
 public class ProtocolFactory {
 
+    public final static String TAG = "ProtocolFactory";
+
     public static ByteBuffer parseProtocol(int type, String IP, byte[] content) {
         return parseProtocol(type, IP, content, content.length);
     }

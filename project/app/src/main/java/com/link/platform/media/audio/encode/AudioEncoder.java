@@ -2,9 +2,21 @@ package com.link.platform.media.audio.encode;
 
 import android.util.Log;
 
+import com.link.platform.item.MessageItem;
 import com.link.platform.media.audio.AudioData;
+import com.link.platform.media.audio.AudioManager;
 import com.link.platform.media.audio.NativeAudioCodec;
+import com.link.platform.message.MessageCenter;
+import com.link.platform.message.MessageTable;
+import com.link.platform.message.MessageWithObject;
+import com.link.platform.network.BaseClient;
+import com.link.platform.util.TimeHelper;
+import com.link.platform.util.Utils;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +33,13 @@ public class AudioEncoder implements Runnable {
 
     private List<AudioData> dataList = null;
 
+    private boolean isSuccess = false;
+
+    private File cache_file;
+    private FileOutputStream fos;
+
+    private int mode;
+
     public static AudioEncoder getInstance() {
         if (encoder == null) {
             encoder = new AudioEncoder();
@@ -35,20 +54,32 @@ public class AudioEncoder implements Runnable {
     public void addData(byte[] data, int size) {
         AudioData rawData = new AudioData();
         rawData.setSize(size);
-        byte[] tempData = new byte[size];
-        System.arraycopy(data, 0, tempData, 0, size);
-        rawData.setData(tempData);
+        rawData.setData(data);
         dataList.add(rawData);
+    }
+
+    public void addData(List<AudioData> list) {
+        dataList.addAll(list);
     }
 
     /*
      * start encoding
      */
-    public void startEncoding() {
+    public void startEncoding( int mode ) {
+        this.mode = mode;
         Log.d(TAG,"start encode thread");
         if (isEncoding) {
             Log.e(TAG , "encoder has been started  !!!");
             return;
+        }
+        if( mode == AudioManager.MODE_SHORT_VOICE ) {
+            cache_file = new File(Utils.SD_PATH + Utils.VOICE_CACHE + TimeHelper.currentTime() );
+            try {
+                fos = new FileOutputStream( cache_file );
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
         new Thread(this).start();
     }
@@ -56,13 +87,14 @@ public class AudioEncoder implements Runnable {
     /*
      * end encoding
      */
-    public void stopEncoding() {
+    public void stopEncoding(boolean isSuccess) {
+        this.isSuccess = isSuccess;
         this.isEncoding = false;
     }
 
     public void run() {
         // start sender before encoder
-        AudioSender sender = new AudioSender();
+        AudioSender sender = new AudioSender(mode);
         sender.startSending();
 
         int encodeSize = 0;
@@ -81,10 +113,18 @@ public class AudioEncoder implements Runnable {
                 }
                 continue;
             }
-            if (isEncoding) {
+            if (isEncoding && dataList.size() > 0) {
                 AudioData rawData = dataList.remove(0);
                 encodedData = new byte[rawData.getSize()];
-                //
+
+                if( mode == AudioManager.MODE_SHORT_VOICE ) {
+                    try {
+                        fos.write(rawData.getData(), 0 , rawData.getSize());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 encodeSize = NativeAudioCodec.audio_encode(rawData.getData(), 0,
                         rawData.getSize(), encodedData, 0);
 
@@ -93,7 +133,21 @@ public class AudioEncoder implements Runnable {
                 }
             }
         }
-        Log.d(TAG,"end encoding");
-        sender.stopSending();
+        if( isSuccess && mode == AudioManager.MODE_SHORT_VOICE ) {
+            MessageWithObject msg = new MessageWithObject();
+            msg.setMsgId(MessageTable.MSG_VOICE);
+            msg.setObject(MessageItem.voiceMessage(BaseClient.getInstance(BaseClient.TAG).getIP(), true, cache_file.getPath()));
+            MessageCenter.getInstance().sendMessage(msg);
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            sender.setSuccess(isSuccess);
+        }
+        else {
+            Log.d(TAG,"end encoding");
+            sender.stopSending(isSuccess);
+        }
     }
 }

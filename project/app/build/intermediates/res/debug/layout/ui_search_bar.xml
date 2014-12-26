@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:gravity="center_vertical"
+    android:id="@+id/search_layout"
+    android:background="@drawable/atm_search_view_bg"
+    android:padding="@dimen/common_unit_margin"
+    android:layout_width="fill_parent"
+    android:layout_height="49.3dip"
+    android:focusable="true">
+    <com.link.platform.ui.component.SearchEditText
+        android:textSize="14dip"
+        android:textColor="@color/third_grade_color"
+        android:ellipsize="end"
+        android:id="@+id/search_bar"
+        android:background="@drawable/atm_search_text_bg"
+        android:paddingLeft="9.0dip"
+        android:paddingRight="@dimen/common_unit_margin"
+        android:layout_width="fill_parent"
+        android:layout_height="36dip"
+        android:hint="@string/search_text_hint"
+        android:singleLine="true"
+        android:freezesText="true"
+        android:drawableLeft="@drawable/atm_search_icon"
+        android:drawableRight="@drawable/atm_search_icon_delete"
+        android:drawablePadding="@dimen/common_unit_margin"
+        android:inputType="textNoSuggestions"
+        android:imeOptions="flagNoExtractUi"
+        />
+</RelativeLayout>
+<!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/layout/ui_search_bar.xml -->

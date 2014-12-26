@@ -1,0 +1,12 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <item
+        android:id="@+id/action_create"
+        android:icon="@drawable/icon_factory_add"
+        android:orderInCategory="0"
+        android:title="创建房间"
+        android:showAsAction="always"
+        />
+</menu>
+<!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/menu/main.xml -->

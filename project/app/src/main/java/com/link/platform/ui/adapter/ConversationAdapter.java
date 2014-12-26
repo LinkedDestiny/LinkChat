@@ -34,7 +34,8 @@ public class ConversationAdapter extends BaseAdapter implements Filterable {
     public ConversationAdapter(Context context) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
-
+        list = new ArrayList<WiFiItem>();
+        current_list = new ArrayList<WiFiItem>();
     }
 
     public void setData( List<WiFiItem> list ) {

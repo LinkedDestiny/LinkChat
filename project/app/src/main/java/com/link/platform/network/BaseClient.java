@@ -8,6 +8,9 @@ import com.link.platform.activity.setting.LocalSetting;
 import com.link.platform.item.ContactItem;
 import com.link.platform.item.MessageItem;
 
+import com.link.platform.item.NetworkItem;
+import com.link.platform.media.audio.AudioManager;
+import com.link.platform.media.audio.decode.AudioDecoder;
 import com.link.platform.message.MessageCenter;
 import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
@@ -57,9 +60,9 @@ public class BaseClient implements IClient {
     }
 
     public void start() {
-        client.start();
         handlerthread.start();
         handler = new Handler(handlerthread.getLooper());
+        client.start();
     }
 
     public void stop() {
@@ -74,20 +77,18 @@ public class BaseClient implements IClient {
 
     public boolean sendMessage(MessageItem msg) {
         final MessageItem msgItem = msg;
+
         handler.post(new Runnable() {
             @Override
             public void run() {
                 byte[] bytes;
                 try {
-                    bytes = msgItem.content.getBytes( msgItem.singleByteDecode ? "ISO-8859-1" : "UTF-9" );
+                    bytes = msgItem.content.getBytes(msgItem.singleByteDecode ? "ISO-8859-1" : "UTF-8");
                     ByteBuffer buffer = ProtocolFactory.parseProtocol(msgItem.msg_type, IP, bytes);
                     int errno = client.send(buffer.array());
                     if( errno != Error.IO_SUCCESS ) {
                         Log.e(TAG, "write errno : " + errno );
                     }
-                }
-                catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
                 }
                 catch (IOException e) {
                     e.printStackTrace();
@@ -125,16 +126,27 @@ public class BaseClient implements IClient {
 
         byte[] buff = new byte[message.remaining()];
         message.get(buff);
+        Log.d(TAG, new String(buff));
 
+        final NetworkItem item = new NetworkItem( msg_type, from_ip, buff);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                handleMessage(item.getMsg_type(), item.getFrom_ip(), item.getBuff());
+            }
+        });
 
-        handleMessage(msg_type, from_ip, buff);
     }
 
     @Override
     public void onError(int errno) {
         Log.e(TAG, "error: " + errno );
-        if( errno == Error.IO_CLOSE ) {
-            client.stop();
+        if( errno == Error.IO_CLOSE || errno == Error.IO_FAILURE ) {
+            stop();
+            //TODO SEND CLOSE MSG
+            MessageWithObject msg = new MessageWithObject();
+            msg.setMsgId(MessageTable.MSG_SERVER_CLOSE);
+            MessageCenter.getInstance().sendMessage(msg);
         }
     }
 
@@ -165,7 +177,7 @@ public class BaseClient implements IClient {
                 break;
             }
             case MsgType.MSG_VOICE: {
-
+                AudioManager.getInstance().receive(from_ip, buff);
                 break;
             }
             case MsgType.MSG_FILE: {
@@ -184,7 +196,10 @@ public class BaseClient implements IClient {
             }
             case MsgType.MSG_OFFLINE: {
                 String content = new String(buff);
+                Log.d(TAG, content + " off line");
                 ContactItem contact =  ContactModel.getInstance().getContact(content);
+                if( contact == null )
+                    return;
                 MessageWithObject msg = new MessageWithObject();
                 if(contact.IP.equals("127.0.0.1")) {
                     msg.setMsgId(MessageTable.MSG_SERVER_CLOSE);

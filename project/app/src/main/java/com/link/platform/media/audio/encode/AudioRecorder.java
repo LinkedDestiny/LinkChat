@@ -4,6 +4,11 @@ import android.media.AudioRecord;
 import android.util.Log;
 
 import com.link.platform.media.audio.AudioConfig;
+import com.link.platform.media.audio.AudioData;
+import com.link.platform.media.audio.AudioInstance;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by danyang.ldy on 2014/12/19.
@@ -25,14 +30,21 @@ public class AudioRecorder implements Runnable {
     // samples size
     private int bufferSize = 0;
 
+    private List<AudioData> cache = new ArrayList<AudioData>();
+
+    private boolean isValid = false;
+    private boolean isSuccess = false;
+
+    private int mode;
+
     /*
      * start recording
      */
-    public void startRecording() {
+    public void startRecording(int mode) {
+        this.mode = mode;
         bufferSize = BUFFER_FRAME_SIZE;
 
-        audioBufSize = AudioRecord.getMinBufferSize(AudioConfig.SAMPLERATE,
-                AudioConfig.RECORDER_CHANNEL_CONFIG, AudioConfig.AUDIO_FORMAT);
+        audioBufSize = AudioInstance.getInstance().getBuffSize();
         if (audioBufSize == AudioRecord.ERROR_BAD_VALUE) {
             Log.e(TAG, "audioBufSize error");
             return;
@@ -40,18 +52,20 @@ public class AudioRecorder implements Runnable {
         samples = new byte[audioBufSize];
         // 初始化recorder
         if (null == audioRecord) {
-            audioRecord = new AudioRecord(AudioConfig.AUDIO_RESOURCE,
-                    AudioConfig.SAMPLERATE,
-                    AudioConfig.RECORDER_CHANNEL_CONFIG,
-                    AudioConfig.AUDIO_FORMAT, audioBufSize);
+            audioRecord = AudioInstance.getInstance().getRecorder();
         }
         new Thread(this).start();
+    }
+
+    public void isValid() {
+        isValid = true;
     }
 
     /*
      * stop
      */
-    public void stopRecording() {
+    public void stopRecording(boolean isSuccess) {
+        this.isSuccess = isSuccess;
         this.isRecording = false;
     }
 
@@ -62,7 +76,7 @@ public class AudioRecorder implements Runnable {
     public void run() {
         // start encoder before recording
         AudioEncoder encoder = AudioEncoder.getInstance();
-        encoder.startEncoding();
+        encoder.startEncoding( mode );
         Log.d(TAG,"audioRecord startRecording()");
         audioRecord.startRecording();
         Log.d(TAG,"start recording");
@@ -71,8 +85,22 @@ public class AudioRecorder implements Runnable {
         while (isRecording) {
             bufferRead = audioRecord.read(samples, 0, bufferSize);
             if (bufferRead > 0) {
-                // add data to encoder
-                encoder.addData(samples, bufferRead);
+                if( isValid ) {
+                    // add data to encoder
+                    if( cache.size() > 0 ) {
+                        encoder.addData(cache);
+                        cache.clear();
+                    }
+                    encoder.addData(samples, bufferRead);
+                }
+                else {
+                    AudioData rawData = new AudioData();
+                    rawData.setSize(bufferSize);
+                    byte[] tempData = new byte[bufferSize];
+                    System.arraycopy(samples, 0, tempData, 0, bufferSize);
+                    rawData.setData(tempData);
+                    cache.add(rawData);
+                }
             }
             try {
                 Thread.sleep(10);
@@ -80,8 +108,9 @@ public class AudioRecorder implements Runnable {
                 e.printStackTrace();
             }
         }
+        cache.clear();
         Log.d(TAG,"end recording");
         audioRecord.stop();
-        encoder.stopEncoding();
+        encoder.stopEncoding(isSuccess);
     }
 }

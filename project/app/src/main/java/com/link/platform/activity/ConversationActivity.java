@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -19,6 +21,7 @@ import android.widget.TextView;
 
 import com.link.platform.R;
 import com.link.platform.item.MessageItem;
+import com.link.platform.media.audio.AudioManager;
 import com.link.platform.message.BaseMessage;
 import com.link.platform.message.MessageCenter;
 import com.link.platform.message.MessageListenerDelegate;
@@ -40,7 +43,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ConversationActivity extends Activity implements MessageListenerDelegate , View.OnClickListener
-                                                , TextWatcher , AdapterView.OnItemClickListener {
+                                                , TextWatcher , AdapterView.OnItemClickListener
+                                                , View.OnTouchListener {
 
     public final static String TAG = "ConversationActivity";
     public final static String PARAM_ROOM_NAME = "room_name";
@@ -55,6 +59,9 @@ public class ConversationActivity extends Activity implements MessageListenerDel
 
     private GridView add_view;
     private AddMoreAdapter addMoreAdapter;
+
+    private ImageView audio_record;
+    private ImageView audio_cancel;
 
     private ImageView back, settings;
     private TextView title;
@@ -76,6 +83,10 @@ public class ConversationActivity extends Activity implements MessageListenerDel
     private SmilyManager smilyManager;
     private boolean isEmojShow = false;
     private boolean isAddMoreShow = false;
+
+    private boolean isVoice = false;
+
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,9 +120,11 @@ public class ConversationActivity extends Activity implements MessageListenerDel
 
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_CLOSE_AP_FINISH );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_CONNECT_FINISH );
+        MessageCenter.getInstance().registerListener(this , MessageTable.MSG_SERVER_CLOSE );
 
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_TEXT );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_IMG );
+        MessageCenter.getInstance().registerListener(this , MessageTable.MSG_VOICE );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_ONLINE );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_OFFLINE );
     }
@@ -136,6 +149,8 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         add_more = (ImageView)findViewById(R.id.add_more);
         send = (TextView)findViewById(R.id.send);
         voice_send = (ImageView)findViewById(R.id.voice_send);
+        audio_record = (ImageView)findViewById(R.id.audio_record_button);
+        audio_cancel = (ImageView)findViewById(R.id.audio_cancel);
 
         back.setOnClickListener(this);
         settings.setOnClickListener(this);
@@ -143,6 +158,8 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         add_more.setOnClickListener(this);
         send.setOnClickListener(this);
         voice_send.setOnClickListener(this);
+        audio_record.setOnTouchListener(this);
+        audio_cancel.setOnTouchListener(this);
 
         title = (TextView)findViewById(R.id.title);
         title.setText(room_name);
@@ -167,8 +184,6 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         add_view.setOnItemClickListener(this);
         add_view.setAdapter(addMoreAdapter);
     }
-
-
 
     @Override
     public void onListenerExit() {
@@ -203,6 +218,12 @@ public class ConversationActivity extends Activity implements MessageListenerDel
             d.dismiss();
         }
         else if( id.equals(MessageTable.MSG_TEXT ) ) {
+            Log.d(TAG, "recv message");
+            MessageItem item = (MessageItem)msg.getObject();
+            list.add(item);
+            adapter.notifyDataSetChanged();
+        }
+        else if( id.equals(MessageTable.MSG_VOICE ) ) {
             Log.d(TAG, "recv message");
             MessageItem item = (MessageItem)msg.getObject();
             list.add(item);
@@ -270,6 +291,11 @@ public class ConversationActivity extends Activity implements MessageListenerDel
             case R.id.add_more:
             {
                 clickAddMore();
+                break;
+            }
+            case R.id.voice_send:
+            {
+                clickVoice();
                 break;
             }
             case R.id.message_input:
@@ -380,18 +406,39 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         }
     }
 
+    private void clickVoice() {
+        if( isVoice ) {
+            showKeyboard();
+            findViewById(R.id.voice_panel).setVisibility(View.GONE);
+
+            voice_send.setImageResource(R.drawable.voice_nor);
+            isVoice = false;
+        }
+        else {
+            reset();
+            hideKeyBoard();
+            findViewById(R.id.voice_panel).setVisibility(View.VISIBLE);
+
+            voice_send.setImageResource(R.drawable.keyboard);
+            isVoice = true;
+        }
+    }
+
     private void reset() {
         if( !isSendText ) {
             voice_send.setImageResource(R.drawable.voice_nor);
         }
         emoj.setImageResource(R.drawable.emoj);
         add_more.setImageResource(R.drawable.add_more);
+        voice_send.setImageResource(R.drawable.voice_nor);
 
         add_view.setVisibility(View.GONE);
         findViewById(R.id.emoj_menu).setVisibility(View.GONE);
+        findViewById(R.id.voice_panel).setVisibility(View.GONE);
 
         isEmojShow = false;
         isAddMoreShow = false;
+        isVoice = false;
     }
 
     private void appendTextToInputText(String text, EditText mInputText) {
@@ -414,5 +461,59 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         if( adapterView.getId() == R.id.grid_add_more ) {
             UIHelper.makeToast("功能未完成...");
         }
+    }
+
+    private void clickable( boolean clickable ) {
+        emoj.setEnabled(clickable);
+        add_more.setEnabled(clickable);
+        message_input.setEnabled(clickable);
+        voice_send.setEnabled(clickable);
+    }
+
+    @Override
+    public boolean onTouch(View view, MotionEvent motionEvent) {
+        switch (motionEvent.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+            {
+                Log.d(TAG, "action down: ");
+                clickable(false);
+                AudioManager.getInstance().startRecording(AudioManager.MODE_SHORT_VOICE);
+                handler.postDelayed( new Runnable() {
+                    @Override
+                    public void run() {
+                        AudioManager.getInstance().isValid();
+                    }
+                } , 500 );
+                audio_cancel.setVisibility(View.INVISIBLE);
+                return true;
+            }
+            case MotionEvent.ACTION_MOVE:
+            {
+                float x = motionEvent.getX();
+                float y = motionEvent.getY();
+                // TODO make del icon bigger or smaller
+                return true;
+            }
+            case MotionEvent.ACTION_UP:
+            {
+                Log.d(TAG, "action up: ");
+                clickable(true);
+                audio_cancel.setVisibility(View.GONE);
+                if( view.getId() == R.id.audio_cancel ) {
+                    // TODO 取消录音
+                    Log.d(TAG, "cancel recording");
+                    AudioManager.getInstance().cancelRecording();
+
+                }
+                else if( view.getId() == R.id.audio_record_button ) {
+                    boolean flag = AudioManager.getInstance().stopRecording();
+                    if( !flag ) {
+                        //TODO 时间过短的提醒
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
     }
 }

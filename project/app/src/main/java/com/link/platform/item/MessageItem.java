@@ -1,5 +1,7 @@
 package com.link.platform.item;
 
+import android.util.Log;
+
 import com.link.platform.network.util.MsgType;
 
 /**
@@ -34,6 +36,9 @@ public class MessageItem {
     }
 
     public static MessageItem voiceMessage( String from, boolean isOwn, String content ) {
+        if( content.length() < 20 ) {
+            Log.d("Test", content);
+        }
         return new MessageItem( from, isOwn , content , MsgType.MSG_VOICE , true );
     }
 
