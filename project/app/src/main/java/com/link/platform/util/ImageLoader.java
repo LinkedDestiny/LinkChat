@@ -3,6 +3,7 @@ package com.link.platform.util;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.util.LruCache;
 import android.widget.ImageView;
 
 import java.io.FileInputStream;
@@ -14,6 +15,8 @@ import java.io.InputStream;
  * Created by danyang.ldy on 2014/12/11.
  */
 public class ImageLoader {
+
+    private LruCache<String, Bitmap> lruCache;
 
     private static ImageLoader Instance = null;
 
@@ -32,11 +35,19 @@ public class ImageLoader {
 
     private ImageLoader() {
         path = Environment.getExternalStorageDirectory().getPath() + Utils.STORAGE_PATH + Utils.IMG_CACHE;
+        int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        int cacheSize = maxMemory / 8;
+        lruCache = new LruCache<String, Bitmap>(cacheSize);
     }
 
     public void loadImage(ImageView view, String url, int default_id) {
         if( StringUtil.isBlank(url) ) {
             view.setImageResource(default_id);
+            return;
+        }
+        Bitmap cache = lruCache.get(url);
+        if( cache != null ) {
+            view.setImageBitmap(cache);
             return;
         }
         BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -52,15 +63,15 @@ public class ImageLoader {
         opts.inTempStorage = new byte[16 * 1024];
         FileInputStream is = null;
         Bitmap bmp = null;
-        InputStream ins = null;
         try {
-            is = new FileInputStream(path);
+            is = new FileInputStream(url);
             bmp = BitmapFactory.decodeFileDescriptor(is.getFD(), null, opts);
             double scale = getScaling(opts.outWidth * opts.outHeight, 1024 * 600);
             Bitmap bmp2 = Bitmap.createScaledBitmap(bmp,
                     (int) (opts.outWidth * scale),
                     (int) (opts.outHeight * scale), true);
             bmp.recycle();
+            lruCache.put(url, bmp2);
             view.setImageBitmap(bmp2);
             return;
         } catch (FileNotFoundException e) {
@@ -70,7 +81,6 @@ public class ImageLoader {
         } finally {
             try {
                 is.close();
-                ins.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }

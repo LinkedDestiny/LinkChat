@@ -20,6 +20,7 @@ import com.link.platform.network.util.MsgType;
 import com.link.platform.util.ImageLoader;
 import com.link.platform.util.SmilyManager;
 import com.link.platform.util.StringUtil;
+import com.link.platform.util.UIHelper;
 
 import java.util.List;
 
@@ -212,9 +213,11 @@ public class MessageAdapter extends BaseAdapter {
         viewHolder.message.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AudioPlayer player = AudioPlayer.getInstance();
-                if( player.init( voice.content ) ) {
-                    player.startPlaying();
+                if( voice.msg_type == MsgType.MSG_VOICE ) {
+                    AudioPlayer player = AudioPlayer.getInstance();
+                    if( player.init( voice.content ) ) {
+                        player.startPlaying();
+                    }
                 }
             }
         });
@@ -222,7 +225,27 @@ public class MessageAdapter extends BaseAdapter {
     }
 
     private void handleFileMessage(MessageItem item, ViewHolder viewHolder) {
+        final MessageItem file = item;
+        viewHolder.picture.setVisibility(View.VISIBLE);
+        viewHolder.picture.setBackgroundResource(R.color.transparent);
+        RelativeLayout.LayoutParams imgLayout = (RelativeLayout.LayoutParams) viewHolder.picture.getLayoutParams();
+        if( item.isOwn ) {
 
+            imgLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+            imgLayout.addRule(RelativeLayout.ALIGN_PARENT_LEFT, 0);
+
+        } else {
+            imgLayout.addRule(RelativeLayout.ALIGN_PARENT_LEFT, RelativeLayout.TRUE);
+            imgLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, 0);
+        }
+        viewHolder.picture.setImageResource(R.drawable.default_file);
+        viewHolder.picture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                UIHelper.makeToast(file.content);
+            }
+        });
+        viewHolder.message.setVisibility(View.GONE);
     }
 
     private String replaceNewLineCode(String replaceStr) {

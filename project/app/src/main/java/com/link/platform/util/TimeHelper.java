@@ -6,7 +6,6 @@ import java.util.Calendar;
  * Created by danyang.ldy on 2014/12/19.
  */
 public class TimeHelper {
-
     public static int getIdByTime() {
         return currentTime().hashCode();
     }

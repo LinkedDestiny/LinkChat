@@ -3,8 +3,11 @@ package com.link.platform.activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -20,6 +23,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.link.platform.R;
+import com.link.platform.file.FileManager;
+import com.link.platform.item.MenuItem;
 import com.link.platform.item.MessageItem;
 import com.link.platform.media.audio.AudioManager;
 import com.link.platform.message.BaseMessage;
@@ -30,6 +35,7 @@ import com.link.platform.message.MessageWithObject;
 import com.link.platform.network.BaseClient;
 import com.link.platform.network.ServerService;
 import com.link.platform.network.socket.IOHelper;
+import com.link.platform.network.util.MsgType;
 import com.link.platform.ui.adapter.AddMoreAdapter;
 import com.link.platform.ui.adapter.EmojAdapter;
 import com.link.platform.ui.adapter.MessageAdapter;
@@ -39,6 +45,7 @@ import com.link.platform.util.Utils;
 import com.link.platform.wifi.ap.APManager;
 import com.link.platform.wifi.wifi.WiFiManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -88,6 +95,8 @@ public class ConversationActivity extends Activity implements MessageListenerDel
 
     private Handler handler = new Handler();
 
+    private File tempFile;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,6 +134,7 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_TEXT );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_IMG );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_VOICE );
+        MessageCenter.getInstance().registerListener(this , MessageTable.MSG_FILE );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_ONLINE );
         MessageCenter.getInstance().registerListener(this , MessageTable.MSG_OFFLINE );
     }
@@ -232,6 +242,19 @@ public class ConversationActivity extends Activity implements MessageListenerDel
         else if( id.equals(MessageTable.MSG_ONLINE ) ) {
             Log.d(TAG, "recv ONLINE");
             MessageItem item = (MessageItem)msg.getObject();
+            list.add(item);
+            adapter.notifyDataSetChanged();
+        }
+        else if( id.equals(MessageTable.MSG_FILE ) ) {
+            Log.d(TAG, "recv FILE");
+            MessageItem item = (MessageItem)msg.getObject();
+            list.add(item);
+            adapter.notifyDataSetChanged();
+        }
+        else if( id.equals(MessageTable.MSG_IMG ) ) {
+
+            MessageItem item = (MessageItem)msg.getObject();
+            Log.d(TAG, "recv IMG " + item.msg_type );
             list.add(item);
             adapter.notifyDataSetChanged();
         }
@@ -459,11 +482,82 @@ public class ConversationActivity extends Activity implements MessageListenerDel
            appendTextToInputText( SmilyManager.getInstance().getShortCut( index - R.drawable.eaa ) , message_input );
         }
         if( adapterView.getId() == R.id.grid_add_more ) {
-            UIHelper.makeToast("功能未完成...");
+            tempFile = FileManager.getInstance().createTempFile(Utils.IMG_CACHE);
+            switch (i) {
+                case MenuItem.MENU_FILE:
+                {
+                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                    intent.setType("*/*");
+                    intent.addCategory(Intent.CATEGORY_OPENABLE);
+                    try {
+                        startActivityForResult(Intent.createChooser(intent, "请选择一个要上传的文件"),
+                                Utils.FILE_SELECT_CODE);
+                    } catch (android.content.ActivityNotFoundException ex) {
+                        UIHelper.makeToast("请安装文件管理器");
+                    }
+                    break;
+                }
+                case MenuItem.MENU_PIC:
+                {
+                    Intent intent = new Intent(Intent.ACTION_PICK);// 打开相册
+                    intent.setDataAndType(MediaStore.Images.Media.INTERNAL_CONTENT_URI, "image/*");
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tempFile));
+                    startActivityForResult(intent, Utils.OPEN_GALLERY_CODE);
+                    break;
+                }
+                case MenuItem.MENU_CAMERA:
+                {
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);// 打开相机
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tempFile));
+                    startActivityForResult(intent, Utils.OPEN_CAMERA_CODE);
+                    break;
+                }
+            }
         }
     }
 
-    private void clickable( boolean clickable ) {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if( resultCode == RESULT_OK ) {
+            switch (requestCode) {
+                case Utils.FILE_SELECT_CODE:
+                {
+                    Uri uri = data.getData();
+                    Cursor cursor = getContentResolver().query(uri, null, null, null,null);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+                        FileManager.getInstance().sendFile(path, MsgType.MSG_FILE);
+                        list.add( MessageItem.fileMessage("" , true, uri.getPath()) );
+                        adapter.notifyDataSetChanged();
+                    }
+                    break;
+                }
+                case Utils.OPEN_GALLERY_CODE:
+                {
+                    Uri uri = data.getData();
+                    Cursor cursor = getContentResolver().query(uri, null, null, null,null);
+                    if (cursor != null && cursor.moveToFirst()) {
+                        String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
+                        FileManager.getInstance().sendFile(path, MsgType.MSG_IMG);
+
+                        list.add( MessageItem.imgMessage("" , true, path) );
+                        adapter.notifyDataSetChanged();
+                    }
+
+                    break;
+                }
+                case Utils.OPEN_CAMERA_CODE:
+                {
+                    FileManager.getInstance().sendFile(tempFile.getPath(), MsgType.MSG_IMG);
+                    list.add( MessageItem.imgMessage("" , true, tempFile.getPath()) );
+                    adapter.notifyDataSetChanged();
+                    break;
+                }
+            }
+        }
+    }
+
+        private void clickable( boolean clickable ) {
         emoj.setEnabled(clickable);
         add_more.setEnabled(clickable);
         message_input.setEnabled(clickable);
@@ -515,5 +609,18 @@ public class ConversationActivity extends Activity implements MessageListenerDel
             }
         }
         return false;
+    }
+
+    private void cropPhoto(Uri uri) {
+        File tempFile = FileManager.getInstance().createTempFile(Utils.IMG_CACHE);
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+        intent.putExtra("output", Uri.fromFile(tempFile));
+        intent.putExtra("crop", true);
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY", 1);
+        intent.putExtra("outputX", 300);
+        intent.putExtra("outputY", 300);
+        startActivityForResult(intent, Utils.CROP_PHOTO_CODE);
     }
 }

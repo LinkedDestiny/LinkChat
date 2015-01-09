@@ -5,12 +5,12 @@ import android.os.HandlerThread;
 import android.util.Log;
 
 import com.link.platform.activity.setting.LocalSetting;
+import com.link.platform.file.FileManager;
 import com.link.platform.item.ContactItem;
 import com.link.platform.item.MessageItem;
 
 import com.link.platform.item.NetworkItem;
 import com.link.platform.media.audio.AudioManager;
-import com.link.platform.media.audio.decode.AudioDecoder;
 import com.link.platform.message.MessageCenter;
 import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
@@ -24,10 +24,10 @@ import com.link.platform.util.*;
 import com.link.platform.util.Error;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -48,7 +48,12 @@ public class BaseClient implements IClient {
     private String IP;
 
     private Handler handler;
-    private HandlerThread handlerthread;
+    private HandlerThread handlerThread;
+
+    private Thread thread;
+    private boolean running = true;
+
+    private List<NetworkItem> dataList;
 
     public BaseClient(String host, int port) {
         client = new MainClient(host, port, this);
@@ -56,18 +61,22 @@ public class BaseClient implements IClient {
             INSTANCES.remove(TAG);
         }
         INSTANCES.put( TAG , this );
-        handlerthread = new HandlerThread("SendThread");
+        dataList = Collections.synchronizedList(new LinkedList<NetworkItem>());
+        thread = new Thread( new HandlerRunnable() );
+        handlerThread = new HandlerThread("handlerThread");
     }
 
     public void start() {
-        handlerthread.start();
-        handler = new Handler(handlerthread.getLooper());
+        handlerThread.start();
+        handler = new Handler( handlerThread.getLooper() );
+        thread.start();
         client.start();
     }
 
     public void stop() {
         client.stop();
-        handlerthread.quit();
+        handlerThread.quit();
+        running = false;
         INSTANCES.remove(TAG);
     }
 
@@ -77,24 +86,18 @@ public class BaseClient implements IClient {
 
     public boolean sendMessage(MessageItem msg) {
         final MessageItem msgItem = msg;
-
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                byte[] bytes;
-                try {
-                    bytes = msgItem.content.getBytes(msgItem.singleByteDecode ? "ISO-8859-1" : "UTF-8");
-                    ByteBuffer buffer = ProtocolFactory.parseProtocol(msgItem.msg_type, IP, bytes);
-                    int errno = client.send(buffer.array());
-                    if( errno != Error.IO_SUCCESS ) {
-                        Log.e(TAG, "write errno : " + errno );
-                    }
-                }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
+        byte[] bytes;
+        try {
+            bytes = msgItem.content.getBytes(msgItem.singleByteDecode ? "ISO-8859-1" : "UTF-8");
+            ByteBuffer buffer = ProtocolFactory.parseProtocol(msgItem.msg_type, IP, bytes);
+            int errno = client.send(buffer.array());
+            if( errno != Error.IO_SUCCESS ) {
+                Log.e(TAG, "write errno : " + errno );
             }
-        });
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
         return true;
     }
 
@@ -126,16 +129,9 @@ public class BaseClient implements IClient {
 
         byte[] buff = new byte[message.remaining()];
         message.get(buff);
-        Log.d(TAG, new String(buff));
 
         final NetworkItem item = new NetworkItem( msg_type, from_ip, buff);
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                handleMessage(item.getMsg_type(), item.getFrom_ip(), item.getBuff());
-            }
-        });
-
+        dataList.add(item);
     }
 
     @Override
@@ -151,7 +147,6 @@ public class BaseClient implements IClient {
     }
 
     private void handleMessage(int msg_type, String from_ip, byte[] buff) {
-        Log.d(TAG, "recv from " + from_ip );
         switch ( msg_type ) {
             case MsgType.MSG_ONLINE_LIST: {
                 String content = new String(buff);
@@ -173,7 +168,7 @@ public class BaseClient implements IClient {
                 break;
             }
             case MsgType.MSG_IMG: {
-
+                FileManager.getInstance().recvFile(from_ip, buff , MessageTable.MSG_IMG);
                 break;
             }
             case MsgType.MSG_VOICE: {
@@ -181,7 +176,7 @@ public class BaseClient implements IClient {
                 break;
             }
             case MsgType.MSG_FILE: {
-
+                FileManager.getInstance().recvFile(from_ip, buff , MessageTable.MSG_FILE);
                 break;
             }
             case MsgType.MSG_ONLINE: {
@@ -196,7 +191,6 @@ public class BaseClient implements IClient {
             }
             case MsgType.MSG_OFFLINE: {
                 String content = new String(buff);
-                Log.d(TAG, content + " off line");
                 ContactItem contact =  ContactModel.getInstance().getContact(content);
                 if( contact == null )
                     return;
@@ -211,6 +205,19 @@ public class BaseClient implements IClient {
                 ContactModel.getInstance().removeContact(content);
                 MessageCenter.getInstance().sendMessage(msg);
                 break;
+            }
+        }
+    }
+
+    class HandlerRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            while ( running ) {
+                while ( dataList.size() > 0 ) {
+                    NetworkItem item = dataList.remove(0);
+                    handleMessage(item.getMsg_type(), item.getFrom_ip(), item.getBuff());
+                }
             }
         }
     }

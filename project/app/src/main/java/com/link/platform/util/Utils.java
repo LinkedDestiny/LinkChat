@@ -28,8 +28,14 @@ public class Utils {
     public static int WIFI_AP_STATE_ENABLED = 3;
     public static int WIFI_AP_STATE_FAILED = 4;
 
-    public final static int BUFFER_SIZE = 8192;
-    public final static long SELECT_TIMEOUT = 60 * 1000;
+    public final static int BUFFER_SIZE = 8192 * 2;
+    public final static int FILE_BUFFER_SIZE = BUFFER_SIZE - 12;
+    public final static long SELECT_TIMEOUT = 30 * 1000;
+
+    public static final int FILE_SELECT_CODE = 0;
+    public static final int OPEN_CAMERA_CODE = 10;
+    public static final int OPEN_GALLERY_CODE = 11;
+    public static final int CROP_PHOTO_CODE = 12;
 
     public static String PATH;
     public static String SD_PATH;

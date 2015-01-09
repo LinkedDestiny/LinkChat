@@ -35,6 +35,10 @@ public class MessageItem {
         return new MessageItem( from, isOwn , content , MsgType.MSG_IMG , true );
     }
 
+    public static MessageItem fileMessage(String from, boolean isOwn, String content ) {
+        return new MessageItem( from, isOwn , content , MsgType.MSG_FILE , true );
+    }
+
     public static MessageItem voiceMessage( String from, boolean isOwn, String content ) {
         if( content.length() < 20 ) {
             Log.d("Test", content);

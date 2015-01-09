@@ -14,7 +14,9 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -35,11 +37,13 @@ public class MainClient implements Runnable {
     private Selector selector;
 
     private ByteBuffer buffer;
-    private List<ByteBuffer> dataList = new ArrayList<ByteBuffer>();
+    private List<ByteBuffer> dataList;
     private IClient iClient;
 
     private Thread thread;
     private Thread write_thread;
+
+    static int index = 0;
 
     public MainClient( String host, int port, IClient iClient) {
         this.host = host;
@@ -48,6 +52,7 @@ public class MainClient implements Runnable {
 
         buffer = ByteBuffer.allocate(Utils.BUFFER_SIZE);
         loop = false;
+        dataList = Collections.synchronizedList(new LinkedList<ByteBuffer>());
     }
 
     public void start() {
@@ -56,6 +61,7 @@ public class MainClient implements Runnable {
             loop = true;
             thread.start();
             write_thread = new Thread( new Runnable() {
+                int index = 0;
                 @Override
                 public void run() {
                     while( loop ) {
@@ -67,8 +73,12 @@ public class MainClient implements Runnable {
                                     if( buff == null ) {
                                         continue;
                                     }
-                                    int size = buff.getInt(0);
-                                    length = mainchannel.write(buff);
+                                    Log.d(TAG, "buffer size = " + buff.array().length);
+                                    Log.d(TAG, "send " + index + "th pachage: size = " + buff.getInt(0));
+                                    if( mainchannel != null && mainchannel.isOpen() ) {
+                                        length = mainchannel.write(buff);
+                                    }
+                                    index ++;
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();
@@ -112,9 +122,7 @@ public class MainClient implements Runnable {
     }
 
     public int send(byte[] message) throws IOException {
-
         ByteBuffer temp = ByteBuffer.allocate( 4 + message.length );
-        Log.d(TAG, "SEND msg length = " + message.length );
         temp.putInt( message.length );
         temp.put( message );
         temp.flip();
@@ -192,7 +200,6 @@ public class MainClient implements Runnable {
                     iClient.onConnect(IOHelper.ipIntToString(num_ip));
                 }
 
-
                 mainchannel.configureBlocking(false);
                 mainchannel.register(selector, SelectionKey.OP_READ );
             } else {
@@ -200,22 +207,24 @@ public class MainClient implements Runnable {
             }
         }
         if (key.isReadable()) {
-            Log.d(TAG, "SelectionKey Reading ...");
 
             SocketChannel channel = (SocketChannel) key.channel();
 
             int errno = IOHelper.read(channel, buffer);
             if( errno == Error.IO_CLOSE ) {
+                buffer.clear();
                 iClient.onError(errno);
                 return;
             } else if( errno == Error.IO_FAILURE ) {
+                buffer.clear();
                 iClient.onError(errno);
                 return;
             } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
                 return;
-            } else if( errno > 0 ) {
+            } else {
+                Log.d(TAG, "recv " + errno + " bytes");
                 byte[] buff = new byte[errno];
-                buffer.get( buff );
+                buffer.get( buff , 0 , errno );
                 iClient.onReceive(ByteBuffer.wrap(buff));
 
                 if( !buffer.hasRemaining() ) {
@@ -223,19 +232,22 @@ public class MainClient implements Runnable {
                 } else {
                     while( buffer.remaining() > 4 ) {
                         int len = buffer.getInt();
-                        if( buffer.remaining() < len ) {
+                        Log.d(TAG, "recv " + len + " bytes");
+                        if( len > Utils.BUFFER_SIZE || len < 0 ) {
+                            buffer.clear();
+                            break;
+                        }
+                        else if( buffer.remaining() < len ) {
                             buffer.position( buffer.position() - 4 );
                             break;
                         } else {
-                            buff = new byte[len];
-                            buffer.get( buff );
-                            iClient.onReceive(ByteBuffer.wrap(buff));
+                            byte[] buffs = new byte[len];
+                            buffer.get( buffs , 0 , len );
+                            iClient.onReceive(ByteBuffer.wrap(buffs));
                         }
                     }
                     buffer.compact();
                 }
-            } else {
-
             }
             channel.configureBlocking(false);
             channel.register(selector, SelectionKey.OP_READ);

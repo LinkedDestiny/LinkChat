@@ -17,10 +17,8 @@ import com.link.platform.item.MenuItem;
 public class AddMoreAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
-    private Context context;
 
     public AddMoreAdapter(Context context) {
-        this.context = context;
         inflater = LayoutInflater.from(context);
     }
 
@@ -49,7 +47,7 @@ public class AddMoreAdapter extends BaseAdapter {
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder holder = new ViewHolder();
         if( view == null ) {
-            view = View.inflate(context, R.layout.item_add_more, null);
+            view = inflater.inflate(R.layout.item_add_more, null);
             holder.image = (ImageView)view.findViewById(R.id.item_add_pic);
             holder.name = (TextView)view.findViewById(R.id.item_add_name);
 

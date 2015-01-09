@@ -10,7 +10,12 @@ import java.util.List;
  */
 public class MenuItem {
 
+    public final static int MENU_FILE = 0;
+    public final static int MENU_PIC = 1;
+    public final static int MENU_CAMERA = 2;
+
     public static List<MenuItem> list = new ArrayList<MenuItem>();
+
     static {
         list.add(new MenuItem(R.drawable.send_file , "文件") );
         list.add(new MenuItem(R.drawable.send_pic , "图片") );

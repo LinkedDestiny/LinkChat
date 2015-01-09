@@ -1,6 +1,9 @@
 package com.link.platform.network.socket;
 
+import android.util.Log;
+
 import com.link.platform.util.Error;
+import com.link.platform.util.Utils;
 
 import java.io.IOException;
 import java.net.Inet4Address;
@@ -13,9 +16,7 @@ import java.nio.channels.SocketChannel;
  */
 public class IOHelper {
 
-    public static int read( SocketChannel channel , ByteBuffer buffer )
-             {
-
+    public static int read( SocketChannel channel , ByteBuffer buffer ) {
         if( channel == null )
             return Error.IO_NO_CHANNEL;
 
@@ -26,10 +27,14 @@ public class IOHelper {
              e.printStackTrace();
              return Error.IO_CLOSE;
          }
-         if ( count > 0 ) {
+         if ( count > 0 || ( count == 0 && ( buffer.position() == buffer.limit() ) ) ) {
+            buffer.flip();
             if( buffer.remaining() > 4 ) {
                 int len = buffer.getInt();
-                if( buffer.remaining() < len ) {
+                Log.d("IOHelper", "len = " + len );
+                if( len < 0 || len > Utils.BUFFER_SIZE ) {
+                    return Error.IO_FAILURE;
+                } else if( buffer.remaining() < len ) {
                     buffer.position( buffer.position() - 4 );
                     buffer.compact();
                     return Error.IO_PROTOCOL_NO_COMPLETE;
@@ -38,10 +43,8 @@ public class IOHelper {
             } else {
                 return Error.IO_PROTOCOL_NO_COMPLETE;
             }
-        } else if( count == -1 ) {
-            return Error.IO_CLOSE;
         } else {
-            return Error.IO_FAILURE;
+            return Error.IO_CLOSE;
         }
     }
 
@@ -72,6 +75,24 @@ public class IOHelper {
         } catch (Exception e) {
             throw new IllegalArgumentException(ipAddr + " is invalid IP");
         }
+    }
+
+    public static byte[] intToByteArray(int value) {
+        byte[] src = new byte[4];
+        src[3] =  (byte) ((value>>24) & 0xFF);
+        src[2] =  (byte) ((value>>16) & 0xFF);
+        src[1] =  (byte) ((value>>8) & 0xFF);
+        src[0] =  (byte) (value & 0xFF);
+        return src;
+    }
+
+    public static int bytesToInt(byte[] src, int offset) {
+        int value;
+        value = (int) ((src[offset] & 0xFF)
+                | ((src[offset+1] & 0xFF)<<8)
+                | ((src[offset+2] & 0xFF)<<16)
+                | ((src[offset+3] & 0xFF)<<24));
+        return value;
     }
 
 }

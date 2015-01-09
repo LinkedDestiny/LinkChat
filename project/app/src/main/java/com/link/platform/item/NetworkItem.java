@@ -1,14 +1,19 @@
 package com.link.platform.item;
 
-import android.util.Log;
+import java.net.Socket;
 
 /**
  * Created by danyang.ldy on 2014/12/24.
  */
 public class NetworkItem {
+
+    private Socket socket;
+
     private int msg_type;
     private String from_ip;
-    private byte[] buff;
+    private byte[] content;
+
+    private byte[] buffer;
 
     public NetworkItem() {}
 
@@ -16,6 +21,16 @@ public class NetworkItem {
         setBuff(buff);
         setFrom_ip(from_ip);
         setMsg_type(msg_type);
+    }
+
+    public NetworkItem(int msg_type, String from_ip, byte[] buff, byte[] buffer, Socket socket) {
+        setBuff(buff);
+        setFrom_ip(from_ip);
+        setMsg_type(msg_type);
+
+        this.buffer = new byte[buffer.length];
+        System.arraycopy(buffer, 0, this.buffer, 0, buffer.length);
+        this.socket = socket;
     }
 
     public int getMsg_type() {
@@ -35,11 +50,19 @@ public class NetworkItem {
     }
 
     public byte[] getBuff() {
-        return buff;
+        return content;
     }
 
     public void setBuff(byte[] buff) {
-        this.buff = new byte[buff.length];
-        System.arraycopy(buff,0,this.buff,0,buff.length);
+        this.content = new byte[buff.length];
+        System.arraycopy(buff,0,this.content,0,buff.length);
+    }
+
+    public byte[] getArray() {
+        return buffer;
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 }

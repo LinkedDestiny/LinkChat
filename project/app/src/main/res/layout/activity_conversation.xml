@@ -80,6 +80,7 @@
                 android:horizontalSpacing="10dp"
                 android:id="@+id/grid_emoj"
                 android:gravity="center"
+                android:listSelector="#00000000"
                 >
 
             </GridView>
@@ -95,6 +96,7 @@
             android:scrollbars="none"
             android:visibility="gone"
             android:verticalSpacing="12dp"
+            android:listSelector="#00000000"
             >
         </GridView>
         <RelativeLayout
@@ -152,6 +154,7 @@
         android:scrollbars="none"
         android:stackFromBottom="true"
         android:transcriptMode="alwaysScroll"
+        android:listSelector="#00000000"
         >
     </ListView>
 </RelativeLayout>

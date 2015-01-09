@@ -210,6 +210,10 @@ public class APManager {
             boolean result = true;
             if( getWiFiAPState() == Utils.WIFI_AP_STATE_FAILED ) {
                 result = false;
+            } else if( getWiFiAPState() == Utils.WIFI_AP_STATE_ENABLED && mMode ) {
+                result = true;
+            } else if( getWiFiAPState() == Utils.WIFI_AP_STATE_DISABLED ) {
+                result = true;
             }
 
             d.dismiss();

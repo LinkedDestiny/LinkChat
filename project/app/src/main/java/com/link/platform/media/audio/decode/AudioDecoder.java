@@ -69,11 +69,7 @@ public class AudioDecoder implements Runnable {
     public void addData(byte[] data, int size) {
         Log.d(TAG, "size = " + size );
         try {
-            if( size == 3 ) {
-                Log.d(TAG,new String(data, "ISO-8859-1") );
-            }
             if(size == 3 && ( new String(data, "ISO-8859-1").equals("END") ) ) {
-                Log.d(TAG, "VOICE END.....");
                 stopDecoding();
                 return;
             }

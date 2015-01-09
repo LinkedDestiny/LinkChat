@@ -1,12 +1,10 @@
 package com.link.platform.network;
 
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 
 import com.link.platform.item.ContactItem;
+import com.link.platform.item.NetworkItem;
 import com.link.platform.network.socket.IController;
-import com.link.platform.network.socket.IOHelper;
 import com.link.platform.network.socket.MainServer;
 import com.link.platform.network.util.MsgType;
 import com.link.platform.network.util.ProtocolFactory;
@@ -15,8 +13,10 @@ import com.link.platform.util.Error;
 import java.io.IOException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -31,10 +31,10 @@ public class BaseController implements IController {
     private Map<String, ContactItem> userList = new HashMap<String, ContactItem>();
     private String host_ip = "192.168.43.1";
 
-    private Handler handler;
-    private HandlerThread handlerthread;
-
     public int index = 0;
+    private Thread handlerthread;
+    private boolean running = true;
+    private List<NetworkItem> dataList;
 
     public BaseController(int port) {
         server = new MainServer(port, this);
@@ -43,12 +43,12 @@ public class BaseController implements IController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        handlerthread = new HandlerThread("RecvThread");
+        dataList = Collections.synchronizedList(new LinkedList<NetworkItem>());
+        handlerthread = new Thread( new HandleRunnable() );
     }
 
     public void start() {
         handlerthread.start();
-        handler = new Handler(handlerthread.getLooper());
         server.start();
     }
 
@@ -58,14 +58,12 @@ public class BaseController implements IController {
 
     public void stop() {
         server.stop();
-        handlerthread.quit();
+        running = false;
     }
 
 
     @Override
     public void onConnect(Socket fd) {
-        // TODO boastcast online list
-
         List<Socket> connect_list = server.getConnect_list();
         Iterator<Socket> iter = connect_list.iterator();
         while( iter.hasNext() ) {
@@ -76,72 +74,74 @@ public class BaseController implements IController {
 
     @Override
     public void onReceive(Socket socket, ByteBuffer msg) {
-        final Socket fd = socket;
         final String IP = socket.getInetAddress().getHostAddress();
-        final ByteBuffer message = msg;
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                Log.d(TAG, "Send a package " + (index ++) + " : size = " + message.limit());
-                List<Socket> connect_list = server.getConnect_list();
-                Iterator<Socket> iter = connect_list.iterator();
-                Log.d(TAG, "Get message from " + IP);
-                int type = message.getInt();
-                if( type == MsgType.MSG_ONLINE ) {
-                    index --;
-                    // send OnlineList
-                    String online_list = ProtocolFactory.parseOnlieList(userList);
-                    ByteBuffer buffer = ProtocolFactory.parseProtocol(MsgType.MSG_ONLINE_LIST, host_ip , online_list.getBytes());
-                    try {
-                        int errno = server.send(fd, buffer.array());
-                        if( errno != Error.IO_SUCCESS) {
-                            Log.e(TAG, "write errno : " + errno );
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    // Add new Contact
-                    String IP = IOHelper.ipIntToString( message.getInt() );
-                    byte[] buff = new byte[message.remaining()];
-                    message.get(buff);
-                    String name = new String(buff);
-                    ContactItem new_contact = new ContactItem(IP, name, "");
-                    userList.put(IP, new_contact);
-                }
-                while( iter.hasNext() ) {
-                    Socket socket = iter.next();
-                    if( !socket.getInetAddress().getHostAddress().equals( IP ) ) {
-                        try {
-                            int errno = server.send(socket, message.array());
-                            if( errno != Error.IO_SUCCESS) {
-                                Log.e(TAG, "write errno : " + errno );
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        });
+        int type = msg.getInt();
+        msg.getInt();
+        byte[] buff = new byte[msg.remaining()];
+        msg.get(buff);
+        Log.d(TAG, "buff size = " + msg.array().length );
+        NetworkItem item = new NetworkItem(type, IP, buff, msg.array(), socket);
+        synchronized (dataList) {
+            dataList.add(item);
+        }
 
     }
 
     @Override
     public void onClose(Socket fd) {
-        Log.d(TAG, fd.getInetAddress().getHostAddress() + " close connection");
+        Log.e(TAG, fd.getInetAddress().getHostAddress() + " close connection");
         ByteBuffer buffer = ProtocolFactory.parseProtocol(MsgType.MSG_OFFLINE, host_ip , fd.getInetAddress().getHostAddress().getBytes());
         List<Socket> connect_list = server.getConnect_list();
         Iterator<Socket> iter = connect_list.iterator();
         while( iter.hasNext() ) {
             Socket socket = iter.next();
-            if( !socket.getInetAddress().getHostAddress().equals( fd.getInetAddress().getHostAddress() ) ) {
-                try {
-                    int errno = server.send(socket, buffer.array());
-                    if( errno != Error.IO_SUCCESS) {
-                        Log.e(TAG, "write errno : " + errno );
+            try {
+                server.send(socket, buffer.array());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            fd.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    class HandleRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            while( running ) {
+                while( dataList.size() > 0 ) {
+                    NetworkItem item = dataList.remove(0);
+                    Log.d(TAG, "recv a package " + (index ++) + " : size = " + item.getBuff().length);
+                    List<Socket> connect_list = server.getConnect_list();
+                    Iterator<Socket> iter = connect_list.iterator();
+                    int type = item.getMsg_type();
+                    if( type == MsgType.MSG_ONLINE ) {
+                        index --;
+                        // send OnlineList
+                        String online_list = ProtocolFactory.parseOnlieList(userList);
+                        ByteBuffer buffer = ProtocolFactory.parseProtocol(MsgType.MSG_ONLINE_LIST, host_ip , online_list.getBytes());
+                        try {
+                            server.send(item.getSocket(), buffer.array());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        ContactItem new_contact = new ContactItem(item.getFrom_ip(), new String(item.getBuff()), "");
+                        userList.put(item.getFrom_ip(), new_contact);
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    while( iter.hasNext() ) {
+                        Socket socket = iter.next();
+                        //if( !socket.getInetAddress().getHostAddress().equals( item.getFrom_ip() ) ) {
+                            try {
+                                server.send(socket, item.getArray());
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        //}
+                    }
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.link.platform.network.socket;
 
 import android.util.Log;
 
+import com.link.platform.network.SendItem;
 import com.link.platform.util.*;
 import com.link.platform.util.Error;
 
@@ -16,8 +17,10 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -40,17 +43,19 @@ public class MainServer implements Runnable {
 
     private IController controller;
     private Map<Socket, ByteBuffer> buffer_map;
-    private ByteBuffer buffer;
 
+    private List<SendItem> dataList;
     private Thread thread;
+    private Thread write_thread;
 
     public MainServer( int port, IController controller) {
         this.port = port;
         this.controller = controller;
 
         buffer_map = new HashMap<Socket, ByteBuffer>();
-        connect_list = new ArrayList<Socket>();
+        connect_list = new LinkedList<Socket>();
 
+        dataList = Collections.synchronizedList(new LinkedList<SendItem>());
     }
 
     public void listen() throws IOException {
@@ -72,6 +77,44 @@ public class MainServer implements Runnable {
             thread = new Thread( this );
             loop = true;
             thread.start();
+            write_thread = new Thread( new Runnable() {
+                int index = 0;
+                @Override
+                public void run() {
+                    while( loop ) {
+                        while( dataList.size() > 0 ) {
+                            long length = 0;
+                            try {
+                                if( dataList.size() > 0 ) {
+                                    SendItem item = dataList.remove(0);
+                                    if( item == null ) {
+                                        continue;
+                                    }
+                                    SocketChannel channel = item.socket.getChannel();
+                                    if( item.socket.isClosed() ) {
+                                        continue;
+                                    }
+                                    if( channel == null )
+                                        continue;
+                                    Log.d(TAG, "buffer size = " + item.buffer.array().length);
+                                    Log.d(TAG, "send " + index + "th pachage: size = " + item.buffer.getInt(0));
+
+                                    length = channel.write(item.buffer);
+                                    if( length < 0 ) {
+                                        controller.onClose(item.socket);
+                                    } else {
+                                        index ++;
+                                    }
+
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            });
+            write_thread.start();
         } else {
             pause = false;
         }
@@ -116,21 +159,15 @@ public class MainServer implements Runnable {
         Log.d(TAG, "close server thread");
     }
 
-    public int send(Socket fd, byte[] message) throws IOException {
-        SocketChannel channel = fd.getChannel();
-        if( channel == null )
-            return Error.IO_NO_CHANNEL;
-
+    public void send(Socket fd, byte[] message) throws IOException {
+        Log.d(TAG, "message length = " + message.length );
         ByteBuffer temp = ByteBuffer.allocate( 4 + message.length );
-        Log.d(TAG, "SEND msg " + new String(message) );
         temp.putInt( message.length );
-        temp.put( message );
+        temp.put( message, 0, message.length );
         temp.flip();
-        long length = channel.write(temp);
-        if( length > 0 ) {
-            return Error.IO_SUCCESS;
-        } else {
-            return (int)length;
+        SendItem item = new SendItem(fd, temp);
+        synchronized (dataList) {
+            dataList.add(item);
         }
 
     }
@@ -146,17 +183,14 @@ public class MainServer implements Runnable {
             selector.close();
 
         buffer_map.clear();
-        if( buffer != null )
-            buffer.clear();
 
         server = null;
         mainchannel = null;
         selector = null;
-        buffer = null;
     }
 
     private void select() throws IOException {
-        selector.select( 30 * 1000 );
+        selector.select( Utils.SELECT_TIMEOUT );
 
         if( loop && !pause ) {
             Iterator<SelectionKey> iter = selector.selectedKeys().iterator();
@@ -202,46 +236,62 @@ public class MainServer implements Runnable {
             Log.d(TAG, "SelectionKey Reading ...");
 
             SocketChannel channel = (SocketChannel) key.channel();
-            buffer = buffer_map.get(channel.socket());
+            ByteBuffer buffer = buffer_map.get(channel.socket());
 
             // TODO 包完整性校验
+            if( buffer.position() > 4 ) {
+                if( buffer.getInt(0) > 10000000 || buffer.getInt(0) < 0) {
+                    buffer.clear();
+                }
+            }
             int errno = IOHelper.read(channel, buffer);
 
             if( errno == Error.IO_CLOSE ) {
                 controller.onClose(channel.socket());
                 connect_list.remove(channel.socket());
+                buffer_map.remove(channel.socket());
                 channel.close();
 
             } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
+                buffer_map.put(channel.socket(), buffer);
                 channel.configureBlocking(false);
                 channel.register(selector, SelectionKey.OP_READ);
             } else if( errno == Error.IO_FAILURE ) {
-
-            } else if( errno > 0 ){
+                controller.onClose(channel.socket());
+                connect_list.remove(channel.socket());
+                channel.close();
+            } else {
+                Log.d(TAG, "read: " + errno);
                 byte[] buff = new byte[errno];
-                buffer.get( buff );
+                buffer.get( buff , 0 , errno );
 
-                controller.onReceive(channel.socket(), ByteBuffer.wrap(buff) );
+                controller.onReceive(channel.socket(), ByteBuffer.wrap(buff));
                 if( !buffer.hasRemaining() ) {
                     buffer.clear();
                 } else {
                     while( buffer.remaining() > 4 ) {
                         int len = buffer.getInt();
-                        if( buffer.remaining() < len ) {
+                        Log.d(TAG, "read: " + len);
+                        if( len < 0 || len > Utils.BUFFER_SIZE ) {
+                            controller.onClose(channel.socket());
+                            connect_list.remove(channel.socket());
+                            buffer_map.remove(channel.socket());
+                            channel.close();
+                            break;
+                        }else if( buffer.remaining() < len ) {
                             buffer.position( buffer.position() - 4 );
                             break;
                         } else {
-                            buff = new byte[len];
-                            buffer.get( buff );
-                            controller.onReceive(channel.socket(), ByteBuffer.wrap(buff) );
+                            byte[] buffs = new byte[len];
+                            buffer.get( buffs , 0 , len );
+                            controller.onReceive(channel.socket(), ByteBuffer.wrap(buffs) );
                         }
                     }
                     buffer.compact();
                 }
+                buffer_map.put(channel.socket(), buffer);
                 channel.configureBlocking(false);
                 channel.register(selector, SelectionKey.OP_READ);
-            } else {
-                Log.e(TAG , "errno :" + errno);
             }
         }
     }
