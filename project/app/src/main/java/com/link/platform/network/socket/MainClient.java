@@ -2,6 +2,7 @@ package com.link.platform.network.socket;
 
 import android.util.Log;
 
+import com.link.platform.network.util.IOHelper;
 import com.link.platform.util.*;
 import com.link.platform.util.Error;
 import com.link.platform.wifi.wifi.WiFiManager;
@@ -13,7 +14,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -210,47 +210,65 @@ public class MainClient implements Runnable {
 
             SocketChannel channel = (SocketChannel) key.channel();
 
-            int errno = IOHelper.read(channel, buffer);
-            if( errno == Error.IO_CLOSE ) {
-                buffer.clear();
-                iClient.onError(errno);
+            int count = channel.read(buffer);
+            if( count < 0 ) {   // close connection
+                iClient.onError(Error.IO_CLOSE);
+                channel.close();
                 return;
-            } else if( errno == Error.IO_FAILURE ) {
-                buffer.clear();
-                iClient.onError(errno);
-                return;
-            } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
-                return;
-            } else {
-                Log.d(TAG, "recv " + errno + " bytes");
-                byte[] buff = new byte[errno];
-                buffer.get( buff , 0 , errno );
-                iClient.onReceive(ByteBuffer.wrap(buff));
-
-                if( !buffer.hasRemaining() ) {
-                    buffer.clear();
-                } else {
-                    while( buffer.remaining() > 4 ) {
-                        int len = buffer.getInt();
-                        Log.d(TAG, "recv " + len + " bytes");
-                        if( len > Utils.BUFFER_SIZE || len < 0 ) {
-                            buffer.clear();
-                            break;
-                        }
-                        else if( buffer.remaining() < len ) {
-                            buffer.position( buffer.position() - 4 );
-                            break;
-                        } else {
-                            byte[] buffs = new byte[len];
-                            buffer.get( buffs , 0 , len );
-                            iClient.onReceive(ByteBuffer.wrap(buffs));
-                        }
-                    }
-                    buffer.compact();
-                }
             }
+            else if( count == 0 ) { // no data or buffer is full
+
+            }
+            else {
+                Log.d(TAG, "read bytes : " + count );
+                buffer.flip();
+                iClient.onReceive(buffer);
+            }
+            buffer.clear();
             channel.configureBlocking(false);
             channel.register(selector, SelectionKey.OP_READ);
+
+//            int errno = IOHelper.read(channel, buffer);
+//            if( errno == Error.IO_CLOSE ) {
+//                buffer.clear();
+//                iClient.onError(errno);
+//                return;
+//            } else if( errno == Error.IO_FAILURE ) {
+//                buffer.clear();
+//                iClient.onError(errno);
+//                return;
+//            } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
+//                return;
+//            } else {
+//                Log.d(TAG, "recv " + errno + " bytes");
+//                byte[] buff = new byte[errno];
+//                buffer.get( buff , 0 , errno );
+//                iClient.onReceive(ByteBuffer.wrap(buff));
+//
+//                if( !buffer.hasRemaining() ) {
+//                    buffer.clear();
+//                } else {
+//                    while( buffer.remaining() > 4 ) {
+//                        int len = buffer.getInt();
+//                        Log.d(TAG, "recv " + len + " bytes");
+//                        if( len > Utils.BUFFER_SIZE || len < 0 ) {
+//                            buffer.clear();
+//                            break;
+//                        }
+//                        else if( buffer.remaining() < len ) {
+//                            buffer.position( buffer.position() - 4 );
+//                            break;
+//                        } else {
+//                            byte[] buffs = new byte[len];
+//                            buffer.get( buffs , 0 , len );
+//                            iClient.onReceive(ByteBuffer.wrap(buffs));
+//                        }
+//                    }
+//                    buffer.compact();
+//                }
+//            }
+//            channel.configureBlocking(false);
+//            channel.register(selector, SelectionKey.OP_READ);
         }
     }
 }

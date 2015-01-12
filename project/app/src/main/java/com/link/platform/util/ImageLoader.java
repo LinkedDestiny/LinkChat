@@ -67,6 +67,9 @@ public class ImageLoader {
             is = new FileInputStream(url);
             bmp = BitmapFactory.decodeFileDescriptor(is.getFD(), null, opts);
             double scale = getScaling(opts.outWidth * opts.outHeight, 1024 * 600);
+            if( bmp == null ) {
+                throw new IOException();
+            }
             Bitmap bmp2 = Bitmap.createScaledBitmap(bmp,
                     (int) (opts.outWidth * scale),
                     (int) (opts.outHeight * scale), true);

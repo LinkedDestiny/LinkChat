@@ -1,7 +1,5 @@
 package com.link.platform.network;
 
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.util.Log;
 
 import com.link.platform.activity.setting.LocalSetting;
@@ -9,14 +7,14 @@ import com.link.platform.file.FileManager;
 import com.link.platform.item.ContactItem;
 import com.link.platform.item.MessageItem;
 
-import com.link.platform.item.NetworkItem;
 import com.link.platform.media.audio.AudioManager;
 import com.link.platform.message.MessageCenter;
 import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
 import com.link.platform.model.ContactModel;
+import com.link.platform.network.item.ByteItem;
 import com.link.platform.network.socket.IClient;
-import com.link.platform.network.socket.IOHelper;
+import com.link.platform.network.util.IOHelper;
 import com.link.platform.network.socket.MainClient;
 import com.link.platform.network.util.MsgType;
 import com.link.platform.network.util.ProtocolFactory;
@@ -47,35 +45,33 @@ public class BaseClient implements IClient {
     private MainClient client;
     private String IP;
 
-    private Handler handler;
-    private HandlerThread handlerThread;
-
-    private Thread thread;
+    private Thread handleThread;
     private boolean running = true;
 
-    private List<NetworkItem> dataList;
+    private List<ByteItem> dataList;
+    private ByteBuffer buffer;
+    private String host;
 
     public BaseClient(String host, int port) {
+        this.host = host;
         client = new MainClient(host, port, this);
         if( INSTANCES.containsKey(TAG) ) {
             INSTANCES.remove(TAG);
         }
         INSTANCES.put( TAG , this );
-        dataList = Collections.synchronizedList(new LinkedList<NetworkItem>());
-        thread = new Thread( new HandlerRunnable() );
-        handlerThread = new HandlerThread("handlerThread");
+        dataList = Collections.synchronizedList(new LinkedList<ByteItem>());
+        handleThread = new Thread( new HandlerRunnable() );
+
+        buffer = ByteBuffer.allocate(Utils.BUFFER_SIZE * 2);
     }
 
     public void start() {
-        handlerThread.start();
-        handler = new Handler( handlerThread.getLooper() );
-        thread.start();
+        handleThread.start();
         client.start();
     }
 
     public void stop() {
         client.stop();
-        handlerThread.quit();
         running = false;
         INSTANCES.remove(TAG);
     }
@@ -104,6 +100,9 @@ public class BaseClient implements IClient {
     @Override
     public void onConnect(String IP) {
         Log.d(TAG, "Connect with IP: " + IP );
+        if( IOHelper.isHost(host) ) {
+            IP = host;
+        }
         this.IP = IP;
         ByteBuffer buffer = ProtocolFactory.parseProtocol(MsgType.MSG_ONLINE, IP, LocalSetting.getInstance().getLocalName().getBytes());
         try {
@@ -124,14 +123,11 @@ public class BaseClient implements IClient {
 
     @Override
     public void onReceive(ByteBuffer message) {
-        int msg_type = message.getInt();
-        String from_ip = IOHelper.ipIntToString(message.getInt());
-
-        byte[] buff = new byte[message.remaining()];
-        message.get(buff);
-
-        final NetworkItem item = new NetworkItem( msg_type, from_ip, buff);
-        dataList.add(item);
+        ByteItem item = new ByteItem(message, null);
+        Log.d(TAG, "receive: " + item.buffer.length );
+        synchronized (dataList) {
+            dataList.add(item);
+        }
     }
 
     @Override
@@ -147,6 +143,10 @@ public class BaseClient implements IClient {
     }
 
     private void handleMessage(int msg_type, String from_ip, byte[] buff) {
+        if( buff.length < 1000 ) {
+            Log.d(TAG, new String(buff));
+        }
+        Log.d(TAG, "msg type = " + msg_type);
         switch ( msg_type ) {
             case MsgType.MSG_ONLINE_LIST: {
                 String content = new String(buff);
@@ -181,6 +181,7 @@ public class BaseClient implements IClient {
             }
             case MsgType.MSG_ONLINE: {
                 String content = new String(buff);
+                Log.d(TAG, content);
                 ContactModel.getInstance().addContact(new ContactItem(from_ip, content, ""));
 
                 MessageWithObject msg = new MessageWithObject();
@@ -195,7 +196,7 @@ public class BaseClient implements IClient {
                 if( contact == null )
                     return;
                 MessageWithObject msg = new MessageWithObject();
-                if(contact.IP.equals("127.0.0.1")) {
+                if( IOHelper.isHost(contact.IP) ) {
                     msg.setMsgId(MessageTable.MSG_SERVER_CLOSE);
                 } else {
                     msg.setMsgId(MessageTable.MSG_OFFLINE);
@@ -214,9 +215,33 @@ public class BaseClient implements IClient {
         @Override
         public void run() {
             while ( running ) {
-                while ( dataList.size() > 0 ) {
-                    NetworkItem item = dataList.remove(0);
-                    handleMessage(item.getMsg_type(), item.getFrom_ip(), item.getBuff());
+                synchronized ( dataList ) {
+                    while( dataList.size() > 0 ) {
+                        ByteItem item = dataList.remove(0);
+                        Log.d(TAG, "buffer has :" + buffer.position() );
+                        buffer.put(item.buffer);
+                        buffer.flip();
+                        while( buffer.remaining() > 4 ) {
+                            int len = buffer.getInt();
+                            Log.d(TAG, "read: " + len);
+                            if( len < 0 || len > Utils.BUFFER_SIZE ) {
+                                break;
+                            }else if( buffer.remaining() < len ) {
+                                buffer.position( buffer.position() - 4 );
+                                break;
+                            } else {
+                                Log.d(TAG, "recv a package size = " + len);
+                                byte[] buffs = new byte[len];
+                                buffer.get( buffs , 0 , len );
+                                int type = IOHelper.bytesToInt(buffs, 0);
+                                String ip = IOHelper.ipIntToString( IOHelper.bytesToInt(buffs, 4));
+                                byte[] buff = new byte[ len - 8 ];
+                                System.arraycopy(buffs, 8, buff, 0, buff.length);
+                                handleMessage(type, ip, buff);
+                            }
+                        }
+                        buffer.compact();
+                    }
                 }
             }
         }

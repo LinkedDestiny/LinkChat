@@ -34,7 +34,7 @@ import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
 import com.link.platform.network.BaseClient;
 import com.link.platform.network.ServerService;
-import com.link.platform.network.socket.IOHelper;
+import com.link.platform.network.util.IOHelper;
 import com.link.platform.network.util.MsgType;
 import com.link.platform.ui.adapter.AddMoreAdapter;
 import com.link.platform.ui.adapter.EmojAdapter;
@@ -214,7 +214,11 @@ public class ConversationActivity extends Activity implements MessageListenerDel
             }
         }
         else if( id.equals(MessageTable.MSG_CONNECT_FINISH)) {
-            own = IOHelper.ipIntToString(WiFiManager.getInstance().getIP());
+            if( IOHelper.isHost(host_ip) ) {
+                own = host_ip;
+            } else {
+                own = IOHelper.ipIntToString(WiFiManager.getInstance().getIP());
+            }
             Log.d(TAG, "IP: " + own );
             Log.d(TAG, "Host IP: " + IOHelper.ipIntToString(WiFiManager.getInstance().getHostIP()) );
             boolean result = Boolean.valueOf(msg.getObject().toString());

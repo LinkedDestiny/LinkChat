@@ -1,7 +1,6 @@
 package com.link.platform.network.util;
 
 import com.link.platform.item.ContactItem;
-import com.link.platform.network.socket.IOHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;

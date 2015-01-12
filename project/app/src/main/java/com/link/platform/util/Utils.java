@@ -47,6 +47,7 @@ public class Utils {
 
     public final static String LOCAL_SETTING = "local_settings";
 
+    public final static String LOCAL_HOST = "127.0.0.1";
     public final static int CHAT_PORT = 9501;
 
     public static void init() {

@@ -1,10 +1,8 @@
 package com.link.platform.file;
 
-import android.util.Log;
-
 import com.link.platform.item.MessageItem;
 import com.link.platform.network.BaseClient;
-import com.link.platform.network.socket.IOHelper;
+import com.link.platform.network.util.IOHelper;
 import com.link.platform.network.util.MsgType;
 import com.link.platform.util.Utils;
 

@@ -40,9 +40,9 @@ public class MainServer implements Runnable {
     private ServerSocketChannel mainchannel;		// server socket channel
     private ServerSocket server;					// server socket
     private Selector selector;
+    private ByteBuffer buffer;
 
     private IController controller;
-    private Map<Socket, ByteBuffer> buffer_map;
 
     private List<SendItem> dataList;
     private Thread thread;
@@ -51,11 +51,10 @@ public class MainServer implements Runnable {
     public MainServer( int port, IController controller) {
         this.port = port;
         this.controller = controller;
-
-        buffer_map = new HashMap<Socket, ByteBuffer>();
         connect_list = new LinkedList<Socket>();
 
         dataList = Collections.synchronizedList(new LinkedList<SendItem>());
+        buffer = ByteBuffer.allocate(Utils.BUFFER_SIZE);
     }
 
     public void listen() throws IOException {
@@ -182,8 +181,6 @@ public class MainServer implements Runnable {
         if( selector != null )
             selector.close();
 
-        buffer_map.clear();
-
         server = null;
         mainchannel = null;
         selector = null;
@@ -223,7 +220,6 @@ public class MainServer implements Runnable {
                 throw new IOException("accpet failed");
             }
             connect_list.add(channel.socket());
-            buffer_map.put(channel.socket(), ByteBuffer.allocate(Utils.BUFFER_SIZE));
             controller.onConnect(channel.socket());
 
             channel.configureBlocking(false);
@@ -236,63 +232,68 @@ public class MainServer implements Runnable {
             Log.d(TAG, "SelectionKey Reading ...");
 
             SocketChannel channel = (SocketChannel) key.channel();
-            ByteBuffer buffer = buffer_map.get(channel.socket());
 
-            // TODO 包完整性校验
-            if( buffer.position() > 4 ) {
-                if( buffer.getInt(0) > 10000000 || buffer.getInt(0) < 0) {
-                    buffer.clear();
-                }
-            }
-            int errno = IOHelper.read(channel, buffer);
 
-            if( errno == Error.IO_CLOSE ) {
-                controller.onClose(channel.socket());
-                connect_list.remove(channel.socket());
-                buffer_map.remove(channel.socket());
-                channel.close();
-
-            } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
-                buffer_map.put(channel.socket(), buffer);
-                channel.configureBlocking(false);
-                channel.register(selector, SelectionKey.OP_READ);
-            } else if( errno == Error.IO_FAILURE ) {
+            int count = channel.read(buffer);
+            if( count < 0 ) {   // close connection
                 controller.onClose(channel.socket());
                 connect_list.remove(channel.socket());
                 channel.close();
-            } else {
-                Log.d(TAG, "read: " + errno);
-                byte[] buff = new byte[errno];
-                buffer.get( buff , 0 , errno );
-
-                controller.onReceive(channel.socket(), ByteBuffer.wrap(buff));
-                if( !buffer.hasRemaining() ) {
-                    buffer.clear();
-                } else {
-                    while( buffer.remaining() > 4 ) {
-                        int len = buffer.getInt();
-                        Log.d(TAG, "read: " + len);
-                        if( len < 0 || len > Utils.BUFFER_SIZE ) {
-                            controller.onClose(channel.socket());
-                            connect_list.remove(channel.socket());
-                            buffer_map.remove(channel.socket());
-                            channel.close();
-                            break;
-                        }else if( buffer.remaining() < len ) {
-                            buffer.position( buffer.position() - 4 );
-                            break;
-                        } else {
-                            byte[] buffs = new byte[len];
-                            buffer.get( buffs , 0 , len );
-                            controller.onReceive(channel.socket(), ByteBuffer.wrap(buffs) );
-                        }
-                    }
-                    buffer.compact();
-                }
-                buffer_map.put(channel.socket(), buffer);
-                channel.configureBlocking(false);
-                channel.register(selector, SelectionKey.OP_READ);
+                return;
             }
+            else if( count == 0 ) { // no data or buffer is full
+
+            }
+            else {
+                Log.d(TAG, "read bytes : " + count );
+                buffer.flip();
+                controller.onReceive(channel.socket(), buffer);
+            }
+            buffer.clear();
+            channel.configureBlocking(false);
+            channel.register(selector, SelectionKey.OP_READ);
+//            if( errno == Error.IO_CLOSE ) {
+//                controller.onClose(channel.socket());
+//                connect_list.remove(channel.socket());
+//                buffer_map.remove(channel.socket());
+//                channel.close();
+//            } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
+//                buffer_map.put(channel.socket(), buffer);
+//                channel.configureBlocking(false);
+//                channel.register(selector, SelectionKey.OP_READ);
+//            } else if( errno == Error.IO_FAILURE ) {
+//                controller.onClose(channel.socket());
+//                connect_list.remove(channel.socket());
+//                channel.close();
+//            } else {
+//                Log.d(TAG, "read: " + errno);
+//                byte[] buff = new byte[errno];
+//                buffer.get( buff , 0 , errno );
+//
+//                controller.onReceive(channel.socket(), ByteBuffer.wrap(buff));
+//                if( !buffer.hasRemaining() ) {
+//                    buffer.clear();
+//                } else {
+//                    while( buffer.remaining() > 4 ) {
+//                        int len = buffer.getInt();
+//                        Log.d(TAG, "read: " + len);
+//                        if( len < 0 || len > Utils.BUFFER_SIZE ) {
+//                            controller.onClose(channel.socket());
+//                            connect_list.remove(channel.socket());
+//                            buffer_map.remove(channel.socket());
+//                            channel.close();
+//                            break;
+//                        }else if( buffer.remaining() < len ) {
+//                            buffer.position( buffer.position() - 4 );
+//                            break;
+//                        } else {
+//                            byte[] buffs = new byte[len];
+//                            buffer.get( buffs , 0 , len );
+//                            controller.onReceive(channel.socket(), ByteBuffer.wrap(buffs) );
+//                        }
+//                    }
+//                    buffer.compact();
+//                }
         }
     }
 }

@@ -1,9 +1,6 @@
 package com.link.platform.file;
 
-import android.net.Uri;
-import android.util.Log;
-
-import com.link.platform.network.socket.IOHelper;
+import com.link.platform.network.util.IOHelper;
 import com.link.platform.util.TimeHelper;
 import com.link.platform.util.Utils;
 
@@ -52,8 +49,7 @@ public class FileManager {
             receiver.initThread(from_ip, filename , type);
 
             int content_length = content.length - filename_size - 5;
-            if( content_length == 3 && new String(content,filename_size + 5 ,
-                    content_length, "ISO-8859-1").equals("END") ) {
+            if( content_length == 3 ) {
                 receiver.stopThread();
                 return;
             }
