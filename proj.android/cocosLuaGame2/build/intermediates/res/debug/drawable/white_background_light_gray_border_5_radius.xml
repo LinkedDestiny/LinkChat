@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape
+    android:shape="rectangle"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="@color/white"/>
+    <stroke
+        android:width="1px"
+        android:color="@color/content_gray"/>
+    <corners android:radius="10dp"/>
+</shape><!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/drawable/white_background_light_gray_border_5_radius.xml --><!-- From: file:/D:/Workspace/cocos2dx/CocosLuaGame2/frameworks/runtime-src/proj.android/cocosLuaGame2/build/intermediates/exploded-aar/proj.android/SharingPlatform/unspecified/res/drawable/white_background_light_gray_border_5_radius.xml -->

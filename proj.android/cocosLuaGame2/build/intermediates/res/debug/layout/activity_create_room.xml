@@ -1,0 +1,55 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    >
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/create_room_help"
+        android:gravity="center"
+        style="@style/help_text_style"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:singleLine="true"
+        android:textColor="@color/new_title_color"
+        android:layout_marginTop="16dp"
+        android:hint="房间名称"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:id="@+id/activity_room_name_edit"
+        />
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:singleLine="true"
+        android:textColor="@color/new_title_color"
+        android:hint="密码"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:id="@+id/activity_room_password_edit"
+        />
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="0dip"
+        android:layout_weight="1">
+
+        </View>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/create_room_help"
+        android:gravity="center"
+        style="@style/help_text_style"
+
+        />
+</LinearLayout>
+<!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/layout/activity_create_room.xml --><!-- From: file:/D:/Workspace/cocos2dx/CocosLuaGame2/frameworks/runtime-src/proj.android/cocosLuaGame2/build/intermediates/exploded-aar/proj.android/SharingPlatform/unspecified/res/layout/activity_create_room.xml -->

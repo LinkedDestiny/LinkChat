@@ -1,0 +1,202 @@
+-- Merging decision tree log ---
+manifest
+ADDED from AndroidManifest.xml:2:1
+	package
+		ADDED from AndroidManifest.xml:3:7
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:versionName
+		ADDED from AndroidManifest.xml:5:7
+	android:versionCode
+		ADDED from AndroidManifest.xml:4:7
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	xmlns:android
+		ADDED from AndroidManifest.xml:2:11
+	android:installLocation
+		ADDED from AndroidManifest.xml:6:7
+uses-sdk
+ADDED from AndroidManifest.xml:8:5
+MERGED from proj.android:libcocos2dx:unspecified:7:5
+MERGED from proj.android:SharingPlatform:unspecified:7:5
+	android:targetSdkVersion
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+	android:minSdkVersion
+		ADDED from AndroidManifest.xml:8:15
+		INJECTED from AndroidManifest.xml:0:0
+		INJECTED from AndroidManifest.xml:0:0
+uses-feature#0x00020000
+ADDED from AndroidManifest.xml:9:5
+	android:glEsVersion
+		ADDED from AndroidManifest.xml:9:19
+application
+ADDED from AndroidManifest.xml:11:5
+MERGED from proj.android:SharingPlatform:unspecified:35:5
+	android:screenOrientation
+		ADDED from proj.android:SharingPlatform:unspecified:40:9
+	android:label
+		ADDED from AndroidManifest.xml:12:17
+	android:icon
+		ADDED from AndroidManifest.xml:13:18
+	android:allowBackup
+		ADDED from proj.android:SharingPlatform:unspecified:37:9
+	android:theme
+		ADDED from proj.android:SharingPlatform:unspecified:41:9
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:36:9
+meta-data#android.app.lib_name
+ADDED from AndroidManifest.xml:16:9
+	android:value
+		ADDED from AndroidManifest.xml:17:19
+	android:name
+		ADDED from AndroidManifest.xml:16:20
+activity#org.cocos2dx.lua.AppActivity
+ADDED from AndroidManifest.xml:19:9
+	android:screenOrientation
+		ADDED from AndroidManifest.xml:21:19
+	android:label
+		ADDED from AndroidManifest.xml:20:19
+	android:configChanges
+		ADDED from AndroidManifest.xml:23:19
+	android:theme
+		ADDED from AndroidManifest.xml:22:19
+	android:name
+		ADDED from AndroidManifest.xml:19:19
+intent-filter#android.intent.action.MAIN+android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:24:13
+action#android.intent.action.MAIN
+ADDED from AndroidManifest.xml:25:17
+	android:name
+		ADDED from AndroidManifest.xml:25:25
+category#android.intent.category.LAUNCHER
+ADDED from AndroidManifest.xml:26:17
+	android:name
+		ADDED from AndroidManifest.xml:26:27
+service#com.link.game.activity.GameServerService
+ADDED from AndroidManifest.xml:29:9
+	android:enabled
+		ADDED from AndroidManifest.xml:31:13
+	android:exported
+		ADDED from AndroidManifest.xml:32:13
+	android:name
+		ADDED from AndroidManifest.xml:30:13
+supports-screens
+ADDED from AndroidManifest.xml:36:5
+	android:largeScreens
+		ADDED from AndroidManifest.xml:39:23
+	android:smallScreens
+		ADDED from AndroidManifest.xml:37:23
+	android:normalScreens
+		ADDED from AndroidManifest.xml:38:23
+	android:xlargeScreens
+		ADDED from AndroidManifest.xml:40:23
+	android:anyDensity
+		ADDED from AndroidManifest.xml:36:23
+uses-permission#android.permission.INTERNET
+ADDED from AndroidManifest.xml:41:5
+MERGED from proj.android:SharingPlatform:unspecified:15:5
+	android:name
+		ADDED from AndroidManifest.xml:41:22
+uses-permission#android.permission.CHANGE_NETWORK_STATE
+ADDED from AndroidManifest.xml:42:5
+MERGED from proj.android:SharingPlatform:unspecified:11:5
+	android:name
+		ADDED from AndroidManifest.xml:42:22
+uses-permission#android.permission.CHANGE_WIFI_STATE
+ADDED from AndroidManifest.xml:43:5
+MERGED from proj.android:SharingPlatform:unspecified:12:5
+	android:name
+		ADDED from AndroidManifest.xml:43:22
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from AndroidManifest.xml:44:5
+MERGED from proj.android:SharingPlatform:unspecified:13:5
+	android:name
+		ADDED from AndroidManifest.xml:44:22
+uses-permission#android.permission.ACCESS_WIFI_STATE
+ADDED from AndroidManifest.xml:45:5
+MERGED from proj.android:SharingPlatform:unspecified:14:5
+	android:name
+		ADDED from AndroidManifest.xml:45:22
+uses-permission#android.permission.MOUNT_UNMOUNT_FILESYSTEMS
+ADDED from AndroidManifest.xml:47:4
+MERGED from proj.android:SharingPlatform:unspecified:18:5
+	android:name
+		ADDED from AndroidManifest.xml:47:21
+uses-permission#android.permission.WRITE_EXTERNAL_STORAGE
+ADDED from AndroidManifest.xml:48:3
+MERGED from proj.android:SharingPlatform:unspecified:17:5
+	android:name
+		ADDED from AndroidManifest.xml:48:20
+uses-permission#android.permission.WRITE_SETTINGS
+ADDED from proj.android:SharingPlatform:unspecified:16:5
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:16:22
+uses-permission#android.permission.RECORD_AUDIO
+ADDED from proj.android:SharingPlatform:unspecified:19:5
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:19:22
+uses-permission#android.permission.RECORD_VIDEO
+ADDED from proj.android:SharingPlatform:unspecified:20:5
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:20:22
+uses-permission#android.permission.USE_CREDENTIALS
+ADDED from proj.android:SharingPlatform:unspecified:26:5
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:26:22
+uses-permission#android.permission.GET_ACCOUNTS
+ADDED from proj.android:SharingPlatform:unspecified:29:5
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:29:22
+uses-permission#android.permission.READ_PROFILE
+ADDED from proj.android:SharingPlatform:unspecified:32:5
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:32:22
+uses-permission#android.permission.READ_CONTACTS
+ADDED from proj.android:SharingPlatform:unspecified:33:5
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:33:22
+activity#com.link.platform.activity.MainActivity
+ADDED from proj.android:SharingPlatform:unspecified:42:9
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:42:19
+activity#com.link.platform.activity.LoginActivity
+ADDED from proj.android:SharingPlatform:unspecified:44:9
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:44:19
+receiver#com.link.platform.MainReceiver
+ADDED from proj.android:SharingPlatform:unspecified:47:9
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:47:19
+intent-filter#android.net.wifi.SCAN_RESULTS
+ADDED from proj.android:SharingPlatform:unspecified:48:13
+action#android.net.wifi.SCAN_RESULTS
+ADDED from proj.android:SharingPlatform:unspecified:49:17
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:49:25
+activity#com.link.platform.activity.WelcomeActivity
+ADDED from proj.android:SharingPlatform:unspecified:53:9
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:53:19
+activity#com.link.platform.activity.CreateRoomActivity
+ADDED from proj.android:SharingPlatform:unspecified:55:9
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:55:19
+activity#com.link.platform.activity.ConversationActivity
+ADDED from proj.android:SharingPlatform:unspecified:57:9
+	android:hardwareAccelerated
+		ADDED from proj.android:SharingPlatform:unspecified:59:13
+	android:windowSoftInputMode
+		ADDED from proj.android:SharingPlatform:unspecified:61:13
+	android:theme
+		ADDED from proj.android:SharingPlatform:unspecified:60:13
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:58:13
+service#com.link.platform.network.ServerService
+ADDED from proj.android:SharingPlatform:unspecified:64:9
+	android:enabled
+		ADDED from proj.android:SharingPlatform:unspecified:66:13
+	android:exported
+		ADDED from proj.android:SharingPlatform:unspecified:67:13
+	android:name
+		ADDED from proj.android:SharingPlatform:unspecified:65:13

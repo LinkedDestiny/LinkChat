@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+    <include layout="@layout/ui_search_bar"></include>
+    <com.link.platform.ui.component.LoadMoreListView
+        android:layout_width="match_parent"
+        android:layout_height="0dip"
+        android:layout_weight="1"
+        android:id="@+id/conversation_list"
+        android:scrollbars="none"
+        android:dividerHeight="1dp"
+        android:divider="#ccc"
+        >
+        </com.link.platform.ui.component.LoadMoreListView>
+</LinearLayout>
+<!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/layout/fragment_conversation_list.xml --><!-- From: file:/D:/Workspace/cocos2dx/CocosLuaGame2/frameworks/runtime-src/proj.android/cocosLuaGame2/build/intermediates/exploded-aar/proj.android/SharingPlatform/unspecified/res/layout/fragment_conversation_list.xml -->

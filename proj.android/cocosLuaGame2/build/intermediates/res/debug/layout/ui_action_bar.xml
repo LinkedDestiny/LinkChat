@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="45dip"
+    android:gravity="center_vertical"
+    android:background="#18b4ed"
+    android:id="@+id/title_action_bar"
+    android:orientation="vertical"
+    >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="45dip"
+        android:gravity="center_vertical"
+        android:background="#18b4ed">
+        <ImageView
+            android:id="@+id/title_back"
+            android:layout_width="40dip"
+            android:layout_height="40dip"
+            android:src="@drawable/while_back"
+            android:padding="5dip"
+            android:layout_centerVertical="true"
+            />
+        <TextView
+            android:id="@+id/title"
+            style="@style/toolbarTitle"
+            android:text="Room"
+            android:layout_centerVertical="true"
+            />
+
+        <ImageView
+            android:id="@+id/settings"
+            android:layout_width="24dip"
+            android:layout_height="24dip"
+            android:src="@drawable/settings"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="12dip"
+            android:layout_centerVertical="true"
+            />
+        </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:attr/listDivider"
+        >
+    </View>
+</LinearLayout>
+<!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/layout/ui_action_bar.xml --><!-- From: file:/D:/Workspace/cocos2dx/CocosLuaGame2/frameworks/runtime-src/proj.android/cocosLuaGame2/build/intermediates/exploded-aar/proj.android/SharingPlatform/unspecified/res/layout/ui_action_bar.xml -->

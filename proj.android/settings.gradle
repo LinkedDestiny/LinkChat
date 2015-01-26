@@ -1,0 +1,3 @@
+include ':libcocos2dx'
+include ':cocosLuaGame2'
+include ':SharingPlatform'

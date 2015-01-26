@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="30" height="20" tilewidth="32" tileheight="32" nextobjectid="4">
+ <tileset firstgid="1" name="tmw_desert_spacing" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="tmw_desert_spacing.png" width="265" height="199"/>
+  <tile id="37">
+   <properties>
+    <property name="hide" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="49" name="meta_tiles" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="meta_tiles.png" width="67" height="34"/>
+  <tile id="0">
+   <properties>
+    <property name="Collidable" value="true"/>
+   </properties>
+  </tile>
+ </tileset>
+ <tileset firstgid="51" name="tmw_desert_spacing" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="D:/Workspace/cocos2dx/CocosLuaGame/res/tmw_desert_spacing.png" width="265" height="199"/>
+ </tileset>
+ <tileset firstgid="99" name="tmw_desert_spacing" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="D:/Workspace/cocos2dx/CocosLuaGame/res/tmw_desert_spacing.png" width="265" height="199"/>
+ </tileset>
+ <tileset firstgid="147" name="meta_tiles" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="D:/Workspace/cocos2dx/CocosLuaGame/res/meta_tiles.png" width="67" height="34"/>
+ </tileset>
+ <tileset firstgid="149" name="tmw_desert_spacing" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="D:/Workspace/cocos2dx/CocosLuaGame/res/tmw_desert_spacing.png" width="265" height="199"/>
+ </tileset>
+ <tileset firstgid="197" name="crop" tilewidth="32" tileheight="32" spacing="1" margin="1">
+  <image source="D:/Workspace/cocos2dx/CocosLuaGame/res/crop.png" width="400" height="86"/>
+ </tileset>
+ <layer name="background" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJyTY2BgkBvFgxLzk4Dp4RZam80IxExImBlNnQKN7OcEYi4kzE2n+CVkL7H+JSd9EDKbkrBWQ8JySDQhTGn8SgKxFBqWhsrJo9HUxIpArISGlfGop5YbCNlLKz+T6t+hbq8mEGsBsTYam9b2juKhjwFw3URy
+  </data>
+ </layer>
+ <objectgroup name="spawnPoint">
+  <object id="1" name="spawnpoint" x="36" y="258" width="30" height="23"/>
+ </objectgroup>
+ <layer name="Meta" width="30" height="20">
+  <data encoding="base64" compression="zlib">
+   eJxjYBgFo2BwAEMsGF2eVvbSwx5S7aWlOwiZTa8woKad2NKPIZIcNezAZS8xYsTIUdNeWvmZVP8OB3sJlU2jYBRgAwBBkwd4
+  </data>
+ </layer>
+</map>

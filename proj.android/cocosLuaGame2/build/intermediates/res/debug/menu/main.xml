@@ -1,0 +1,12 @@
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <item
+        android:id="@+id/action_create"
+        android:icon="@drawable/icon_factory_add"
+        android:orderInCategory="0"
+        android:title="创建房间"
+        android:showAsAction="always"
+        />
+</menu>
+<!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/menu/main.xml --><!-- From: file:/D:/Workspace/cocos2dx/CocosLuaGame2/frameworks/runtime-src/proj.android/cocosLuaGame2/build/intermediates/exploded-aar/proj.android/SharingPlatform/unspecified/res/menu/main.xml -->

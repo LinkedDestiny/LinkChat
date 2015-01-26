@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<items version="2" >
+
+    <item
+        jar="D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\cocosLuaGame2\build\intermediates\exploded-aar\proj.android\SharingPlatform\unspecified\classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="7701a4348cb1a0e8f2c5d625a992defb2cd3f1ea">
+        <dex dex="D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\cocosLuaGame2\build\intermediates\pre-dexed\debug\classes-632cc665c2c6e805467bf88fd6603b944a1e3b41.jar" />
+    </item>
+    <item
+        jar="D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\cocosLuaGame2\build\intermediates\exploded-aar\proj.android\libcocos2dx\unspecified\classes.jar"
+        jumboMode="false"
+        revision="21.1.2"
+        sha1="9c181a1446a7b6b2ef82b7a22346b123fa14b715">
+        <dex dex="D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\cocosLuaGame2\build\intermediates\pre-dexed\debug\classes-838237880d2591256477a3a1e2c80671e9b29118.jar" />
+    </item>
+
+</items>

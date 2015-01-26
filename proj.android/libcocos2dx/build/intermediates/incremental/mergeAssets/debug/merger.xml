@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\libcocos2dx\src\main\assets"/></dataSet><dataSet config="debug"><source path="D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\libcocos2dx\src\debug\assets"/></dataSet></merger>

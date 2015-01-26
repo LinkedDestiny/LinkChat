@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="oval" >
+
+    <solid android:color="@android:color/holo_red_light" />
+
+    <size
+        android:height="12dp"
+        android:width="12dp" />
+
+</shape><!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/drawable/ui_msg_num.xml --><!-- From: file:/D:/Workspace/cocos2dx/CocosLuaGame2/frameworks/runtime-src/proj.android/cocosLuaGame2/build/intermediates/exploded-aar/proj.android/SharingPlatform/unspecified/res/drawable/ui_msg_num.xml -->

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="true" android:state_pressed="true" android:drawable="@drawable/user_bubble_pressed"/>
+    <item android:drawable="@drawable/user_bubble_nor"/>
+</selector><!-- From: file:/D:/LinkChat/LinkChat/project/app/src/main/res/drawable/chatting_left_content_bg.xml --><!-- From: file:/D:/Workspace/cocos2dx/CocosLuaGame2/frameworks/runtime-src/proj.android/cocosLuaGame2/build/intermediates/exploded-aar/proj.android/SharingPlatform/unspecified/res/drawable/chatting_left_content_bg.xml -->

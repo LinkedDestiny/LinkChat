@@ -1,0 +1,3 @@
+D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\cocosLuaGame2\build\intermediates\classes\debug
+D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\cocosLuaGame2\build\intermediates\pre-dexed\debug\classes-838237880d2591256477a3a1e2c80671e9b29118.jar
+D:\Workspace\cocos2dx\CocosLuaGame2\frameworks\runtime-src\proj.android\cocosLuaGame2\build\intermediates\pre-dexed\debug\classes-632cc665c2c6e805467bf88fd6603b944a1e3b41.jar
