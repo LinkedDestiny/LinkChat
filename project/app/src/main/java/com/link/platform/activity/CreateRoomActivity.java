@@ -15,12 +15,10 @@ import com.link.platform.message.MessageCenter;
 import com.link.platform.message.MessageListenerDelegate;
 import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
-import com.link.platform.network.BaseController;
 import com.link.platform.network.ServerService;
 import com.link.platform.util.StringUtil;
 import com.link.platform.util.UIHelper;
 import com.link.platform.wifi.ap.APManager;
-import com.link.platform.wifi.wifi.WiFiManager;
 
 public class CreateRoomActivity extends Activity implements MessageListenerDelegate {
 

@@ -8,10 +8,7 @@ import android.util.Log;
 import com.link.platform.message.BaseMessage;
 import com.link.platform.message.MessageCenter;
 import com.link.platform.message.MessageListenerDelegate;
-import com.link.platform.message.MessageTable;
 import com.link.platform.util.Utils;
-
-import java.io.IOException;
 
 public class ServerService extends Service implements MessageListenerDelegate {
 
@@ -19,15 +16,15 @@ public class ServerService extends Service implements MessageListenerDelegate {
 
     public static boolean isInitServer = false;
 
-    private BaseController server = null;
+    private BaseServer server = null;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         flags = START_STICKY;
-        //MessageCenter.getInstance().registerListener( this , MessageTable. );
+
         Log.d(TAG, "Start Server service");
         if( server == null && isInitServer ) {
-            server = new BaseController(Utils.CHAT_PORT);
+            server = new ChatServer(Utils.CHAT_PORT);
             server.start();
         }
 

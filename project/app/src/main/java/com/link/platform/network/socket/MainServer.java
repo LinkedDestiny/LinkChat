@@ -252,48 +252,6 @@ public class MainServer implements Runnable {
             buffer.clear();
             channel.configureBlocking(false);
             channel.register(selector, SelectionKey.OP_READ);
-//            if( errno == Error.IO_CLOSE ) {
-//                controller.onClose(channel.socket());
-//                connect_list.remove(channel.socket());
-//                buffer_map.remove(channel.socket());
-//                channel.close();
-//            } else if( errno == Error.IO_PROTOCOL_NO_COMPLETE ) {
-//                buffer_map.put(channel.socket(), buffer);
-//                channel.configureBlocking(false);
-//                channel.register(selector, SelectionKey.OP_READ);
-//            } else if( errno == Error.IO_FAILURE ) {
-//                controller.onClose(channel.socket());
-//                connect_list.remove(channel.socket());
-//                channel.close();
-//            } else {
-//                Log.d(TAG, "read: " + errno);
-//                byte[] buff = new byte[errno];
-//                buffer.get( buff , 0 , errno );
-//
-//                controller.onReceive(channel.socket(), ByteBuffer.wrap(buff));
-//                if( !buffer.hasRemaining() ) {
-//                    buffer.clear();
-//                } else {
-//                    while( buffer.remaining() > 4 ) {
-//                        int len = buffer.getInt();
-//                        Log.d(TAG, "read: " + len);
-//                        if( len < 0 || len > Utils.BUFFER_SIZE ) {
-//                            controller.onClose(channel.socket());
-//                            connect_list.remove(channel.socket());
-//                            buffer_map.remove(channel.socket());
-//                            channel.close();
-//                            break;
-//                        }else if( buffer.remaining() < len ) {
-//                            buffer.position( buffer.position() - 4 );
-//                            break;
-//                        } else {
-//                            byte[] buffs = new byte[len];
-//                            buffer.get( buffs , 0 , len );
-//                            controller.onReceive(channel.socket(), ByteBuffer.wrap(buffs) );
-//                        }
-//                    }
-//                    buffer.compact();
-//                }
         }
     }
 }

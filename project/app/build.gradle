@@ -1,17 +1,11 @@
+//apply plugin: 'com.android.library'
 apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 19
     buildToolsVersion "19.1.0"
 
-    sourceSets {
-        main {
-            jni.srcDirs = []
-            jniLibs.srcDir 'src/main/jniLibs'
-        }
-    }
     defaultConfig {
-        applicationId "com.link.platform"
         minSdkVersion 14
         targetSdkVersion 19
         versionCode 1

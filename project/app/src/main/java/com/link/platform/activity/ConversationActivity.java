@@ -33,6 +33,7 @@ import com.link.platform.message.MessageListenerDelegate;
 import com.link.platform.message.MessageTable;
 import com.link.platform.message.MessageWithObject;
 import com.link.platform.network.BaseClient;
+import com.link.platform.network.ChatClient;
 import com.link.platform.network.ServerService;
 import com.link.platform.network.util.IOHelper;
 import com.link.platform.network.util.MsgType;
@@ -112,7 +113,7 @@ public class ConversationActivity extends Activity implements MessageListenerDel
 
         imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
 
-        client = new BaseClient(host_ip, Utils.CHAT_PORT);
+        client = new ChatClient(host_ip, Utils.CHAT_PORT);
         client.start();
 
         smilyManager = SmilyManager.getInstance();
@@ -287,50 +288,42 @@ public class ConversationActivity extends Activity implements MessageListenerDel
     @Override
     public void onClick(View view) {
         int id = view.getId();
-        switch (id) {
-            case R.id.title_back: {
-                onBack();
-                return;
-            }
-            case R.id.settings: {
-                // TODO jump to Room Detail Page
-                break;
-            }
-            case R.id.send: {
-                String message = message_input.getText().toString();
+        if( id == R.id.title_back ) {
+            onBack();
+            return;
+        }
+        if( id ==  R.id.settings) {
+            // TODO jump to Room Detail Page
+        }
+        if( id ==  R.id.send) {
+            String message = message_input.getText().toString();
 
-                Log.d(TAG, message);
-                MessageItem item = MessageItem.textMessage(own, true, message);
-                if( client.sendMessage( item ) ) {
-                    list.add(item);
-                    adapter.notifyDataSetChanged();
-                    message_input.setText("");
-                } else {
-                    UIHelper.makeToast("消息发送失败");
-                }
-                break;
+            Log.d(TAG, message);
+            MessageItem item = MessageItem.textMessage(own, true, message);
+            if( client.sendMessage( item ) ) {
+                list.add(item);
+                adapter.notifyDataSetChanged();
+                message_input.setText("");
+            } else {
+                UIHelper.makeToast("消息发送失败");
             }
-            case R.id.emoj:
-            {
-                clickEmoj();
-                break;
-            }
-            case R.id.add_more:
-            {
-                clickAddMore();
-                break;
-            }
-            case R.id.voice_send:
-            {
-                clickVoice();
-                break;
-            }
-            case R.id.message_input:
-            {
-                showKeyboard();
-                reset();
-                break;
-            }
+        }
+        if( id ==  R.id.emoj)
+        {
+            clickEmoj();
+        }
+        if( id ==  R.id.add_more)
+        {
+            clickAddMore();
+        }
+        if( id ==  R.id.voice_send)
+        {
+            clickVoice();
+        }
+        if( id ==  R.id.message_input)
+        {
+            showKeyboard();
+            reset();
         }
     }
 
