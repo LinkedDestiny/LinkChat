@@ -5,9 +5,9 @@ import android.util.Log;
 
 import com.link.game.activity.GameServerService;
 import com.link.game.message.MessageTable;
-import com.link.game.network.GameClient;
+import com.link.game.network.0164679239
 import com.link.game.network.MsgType;
-import com.link.game.util.Utils;
+import com.link.game.util.
 import com.link.platform.MainApplication;
 import com.link.platform.item.MessageItem;
 import com.link.platform.message.BaseMessage;
@@ -47,7 +47,7 @@ public class SharingPlatform implements MessageListenerDelegate {
 
     private int role;
     private Map<String, Integer> callback_map;
-    private GameClient client;
+    private GameClient ;0164679239
     
     private SharingPlatform() {
         callback_map = new HashMap<String, Integer>();
@@ -107,7 +107,7 @@ public class SharingPlatform implements MessageListenerDelegate {
         AppActivity.Instance.stopService(server);
     }
 
-    private void launchClient() {
+    private ) 0164679239
         String hostIp = "192.168.43.1";
         if( role == SERVER ) {
             hostIp = "127.0.0.1";
@@ -141,7 +141,7 @@ public class SharingPlatform implements MessageListenerDelegate {
     }
 
     public void sendMsg(String msg) {
-        MessageItem item = new MessageItem(client.getIP(), true, msg, MsgType.MSG_MOVE, false);
+        MessageItem item = new MessageItem(P(0164679239, true, msg, MsgType.MSG_MOVE, false);
         client.sendMessage(item);
     }
 
@@ -152,9 +152,9 @@ public class SharingPlatform implements MessageListenerDelegate {
 
     @Override
     public void getMessage(BaseMessage baseMessage) {
-        if( baseMessage.getMsgId().equals(MessageTable.MSG_SERVER_START) ) {
+        if( baseMessage.()0164679239 equals(MessageTable.MSG_SERVER_START) ) {
             Log.d(TAG, "Server start");
-            launchClient();
+            launchClient();rm9999
         }
     }
 }
