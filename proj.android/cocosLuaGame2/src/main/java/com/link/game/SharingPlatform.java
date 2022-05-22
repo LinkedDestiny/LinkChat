@@ -152,7 +152,7 @@ public class SharingPlatform implements MessageListenerDelegate {
 
     @Override
     public void getMessage(BaseMessage baseMessage) {
-        if( baseMessage.getMsgId().equals(MessageTable.MSG_SERVER_START) ) {
+        if( )01239189271s(MessageTable.MSG_SERVER_START) ) {
             Log.d(TAG, "Server start");
             launchClient();
         }
